@@ -110,9 +110,10 @@ def compactBy4(a):#numpy.ndarray
 
 
 def serve():
-        #env = gym.make('Pong-v0')
-        #env = gym.make('Breakout-ram-v0')
-        #env = gym.make('BreakoutNoFrameskip-v4')
+        #env = gym.make('PongNoFrameskip-v4', obs_type="ram", render_mode="human") # renders hidden parameters instead of image
+        #env = gym.make('PongNoFrameskip-v4', render_mode="rgb_array")
+        #env = gym.make('BreakoutNoFrameskip-v4', obs_type="ram", render_mode="human") # renders hidden parameters instead of image
+        #env = gym.make('BreakoutNoFrameskip-v4', render_mode="rgb_array")
         env = gym.make(getinput("env"), render_mode="rgb_array")
         cycles = int(getinput("cycles"))
         env.reset()
@@ -127,7 +128,7 @@ def serve():
                 putout(reward)
                 done = terminated or truncated
                 putout(done)
-                observation = compactBy4(compactRGB(observation))
+                observation = compactBy4(compactRGB(observation))  # should be commented out when using obs_type="ram"
                 #print(observation)
                 #input('111')
                 putout(tostringa(observation))
