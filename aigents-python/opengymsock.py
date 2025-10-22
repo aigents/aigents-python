@@ -7,7 +7,8 @@
 #https://gym.openai.com/envs/Breakout-v0/
 #https://github.com/openai/gym/issues/588
 
-import gym
+import ale_py
+import gymnasium as gym
 
 import sys
 import socket
@@ -114,6 +115,7 @@ def serve():
         #env = gym.make('PongNoFrameskip-v4', render_mode="rgb_array")
         #env = gym.make('BreakoutNoFrameskip-v4', obs_type="ram", render_mode="human") # renders hidden parameters instead of image
         #env = gym.make('BreakoutNoFrameskip-v4', render_mode="rgb_array")
+        #environment = getinput("env")
         env = gym.make(getinput("env"), render_mode="rgb_array")
         cycles = int(getinput("cycles"))
         env.reset()
