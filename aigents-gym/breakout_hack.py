@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from queue import Queue, Full, Empty
 
@@ -20,20 +21,34 @@ def print_debug(array2d):
 debug = True
 rocket_row = None
 diff_vert = None
+average_array = None 
 
 def process_state(observation, reward):
+    """
+    Value Meaning
+    0 NOOP
+    1 FIRE
+    2 RIGHT
+    3 LEFT
+    """
     global epoch
     global debug
+    global average_array
 
-    #accumulate observations 
+    # accumulate observations 
     if observations.qsize() == memory_size:
         observations.get()
     observations.put((observation, reward))
     epoch += 1
 
-    if epoch % background_refresh_rate == 0:
+    # update background
+    if epoch % background_refresh_rate == 0: 
         observation_maps = [a[0] for a in list(observations.queue)] # grayscale!
         average_array = np.mean(observation_maps, axis=0)
+    
+    if average_array is None:
+        act = 0
+    else:
         diff = np.maximum(np.subtract(observation,average_array),0)
         global rocket_row
         global diff_vert
@@ -44,20 +59,34 @@ def process_state(observation, reward):
                 if diff_vert[row] > max:
                     max = diff_vert[row]
                     rocket_row = row
-            #print(rocket_row)
+            print(rocket_row)
         diff_ball = diff[0:rocket_row]
         ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
-        rocket_col = np.argmax(np.convolve(diff_vert[rocket_row], [1,1,1], mode='same'))
-        if debug:
-            #print_debug(observation) # OK - binary map raw
-            #print_debug(diff) # OK - binary map of ball and rocket
-            #print(diff_vert)
-            #print('===')
-            debug = False
-            print(ball_col,rocket_col)
+        rocket_col = np.argmax(np.convolve(diff[rocket_row], [1,1,1], mode='same'))
         
+        if rocket_col < ball_col:
+            act = 2 # RIGHT
+        elif rocket_col > ball_col:
+            act = 3 # LEFT
+        else:
+            act =1
 
-    return 3 if debug_count % 5 != 0 else 1
+        if debug and rocket_col == -1:
+            #print_debug(observation) # OK - binary map raw
+            print_debug(diff) # OK - binary map of ball and rocket
+            print(diff_vert)
+            print('rocket_row',rocket_row)
+            print(diff[rocket_row])
+            print('===')
+            try:
+                input("Press enter to continue")
+            except SyntaxError:
+                pass
+
+        if debug: 
+            print(ball_col,rocket_col,act)
+
+    return act
 
 
 
