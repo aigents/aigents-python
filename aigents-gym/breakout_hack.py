@@ -18,6 +18,8 @@ def print_debug(array2d):
     #print(len(array2d),len(array2d[0]))
 
 debug = True
+rocket_row = None
+diff_vert = None
 
 def process_state(observation, reward):
     global epoch
@@ -33,11 +35,27 @@ def process_state(observation, reward):
         observation_maps = [a[0] for a in list(observations.queue)] # grayscale!
         average_array = np.mean(observation_maps, axis=0)
         diff = np.maximum(np.subtract(observation,average_array),0)
+        global rocket_row
+        global diff_vert
+        if rocket_row is None:
+            max = 0
+            diff_vert = [int(np.sum(d)) for d in diff] 
+            for row in range(len(diff_vert)):
+                if diff_vert[row] > max:
+                    max = diff_vert[row]
+                    rocket_row = row
+            #print(rocket_row)
+        diff_ball = diff[0:rocket_row]
+        ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
+        rocket_col = np.argmax(np.convolve(diff_vert[rocket_row], [1,1,1], mode='same'))
         if debug:
-            #print_debug(observation) # OK
-            print_debug(diff)
-            print('===')
+            #print_debug(observation) # OK - binary map raw
+            #print_debug(diff) # OK - binary map of ball and rocket
+            #print(diff_vert)
+            #print('===')
             debug = False
+            print(ball_col,rocket_col)
+        
 
     return 3 if debug_count % 5 != 0 else 1
 
