@@ -5,6 +5,8 @@ import time
 import keyboard
 
 
+#env = gym.make('ALE/Breakout-v5', render_mode='human', obs_type="ram") 
+#env = gym.make('Breakout-v4', render_mode='human', obs_type="ram") 
 env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="ram") 
 observation, info = env.reset()
 old_lives = 0

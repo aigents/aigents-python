@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 
-debug = True
+debug = False
 
 def debug_array2str(a):
     return ''.join(['.' if i == 0 else '█' for i in a])
@@ -15,7 +15,7 @@ diff_vert = None
 initial_array = None 
 prev_observation = None
 prev_rocket_size = 0
-prev_action = 1
+#prev_action = 1
 
 def process_state(observation, reward):
     """
@@ -30,7 +30,7 @@ def process_state(observation, reward):
     global rocket_row
     global diff_vert
     global prev_rocket_size
-    global prev_action
+    #global prev_action
 
     if initial_array is None:
         initial_array = np.copy(observation)
@@ -43,14 +43,15 @@ def process_state(observation, reward):
             if diff_vert[row] > max:
                 max = diff_vert[row]
                 rocket_row = row
-        print(rocket_row) # = 157
+        if debug:
+            print(rocket_row) # = 157
 
     diff = np.maximum(np.subtract(observation,initial_array),0)
     diff_ball = diff[0:rocket_row]
 
     # ball size 2, rocket size starts with 16 and gets smaller
     ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same')) + (2)/2
-    rocket_size = int(np.maximum(np.sum([1 for d in observation[rocket_row] if d>0]),0))
+    rocket_size = int(np.sum([1 for d in observation[rocket_row] if d>0]))
     rocket_col = np.argmax(np.convolve(observation[rocket_row], [1,1,1], mode='same')) - 1
     if rocket_col + rocket_size <= 143: # no right wall collision
         prev_rocket_size = rocket_size
@@ -59,19 +60,16 @@ def process_state(observation, reward):
     # check if ball is in game
     if int(np.sum([int(np.sum(d)) for d in diff_ball])) == 0:
         # return rocket to the center of the screen
-        if rocket_col < 72:
+        if rocket_col < 72 - 3:
             return 2 # RIGHT
-        elif rocket_col > 72:
+        elif rocket_col > 72 + 3:
             return 3 # LEFT
         else:
             prev_action = 1
             return 1 # fire new ball
 
-    #print(prev_rocket_size)
-    #print_debug(observation)
-
     # I tried to reduce oscillation, but it made lower high score
-    #if rocket_col < ball_col - 4:
+    #if rocket_col < ball_col - 5:
     #    if rocket_col + (prev_rocket_size)/2 > 143:
     #        act = 0 # NOOP - right wall collision
     #        prev_action = 0
@@ -82,7 +80,7 @@ def process_state(observation, reward):
     #        else:
     #            act = 2 # RIGHT
     #            prev_action = 2
-    #elif rocket_col > ball_col + 4:
+    #elif rocket_col > ball_col + 5:
     #    if prev_action == 2:
     #        act = 0 # NOOP - reduce oscillation
     #        prev_action = 3
@@ -115,13 +113,17 @@ def process_state(observation, reward):
             input("Press enter to continue")
         except SyntaxError:
             pass
-    #if debug: 
-    #    print(rocket_row, ball_col,rocket_col,act)
 
-    #try:
-    #    input("Press enter to continue")
-    #except SyntaxError:
-    #    pass
+    if debug: 
+        print(rocket_row, ball_col,rocket_col,act)
+
+        print(prev_rocket_size)
+        print_debug(observation)
+        print('=+=')
+        try:
+            input("Press enter to continue")
+        except SyntaxError:
+            pass
 
     return act
 
@@ -131,10 +133,6 @@ def process_state(observation, reward):
 
 import ale_py
 import gymnasium as gym
-
-# Initialise the environment
-#env = gym.make("LunarLander-v3", render_mode="human") # works
-
 # https://gymnasium.farama.org/v0.28.0/environments/atari/breakout/
 #env = gym.make('ALE/Breakout-v5', render_mode='human', obs_type="grayscale") 
 #env = gym.make('Breakout-v4', render_mode='human', obs_type="grayscale") 
@@ -154,8 +152,8 @@ for _ in range(10000):
     for i in range(32, len(raw_observation)):
         observation[i-32] = raw_observation[i][8:152]
 
-    #if reward > 0:
-    #    print(reward)
+    if debug and reward > 0:
+        print(reward)
 
     # If the episode has ended reset game and fire ball
     if terminated or truncated:
