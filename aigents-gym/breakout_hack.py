@@ -4,6 +4,7 @@ from queue import Queue, Full, Empty
 
 memory_size = 30
 background_refresh_rate = 10
+reactivity = 4
 
 observations = Queue(maxsize=memory_size) 
 epoch = 0
@@ -18,15 +19,16 @@ def print_debug(array2d):
         print(debug_array2str(a,1))
     #print(len(array2d),len(array2d[0]))
 
-debug = True
+#debug = True
 racket_row = None
 diff_vert = None
 average_array = None 
 ball_col_old = None
 racket_col_old = None
+score = 0
+scores = []
 
-
-def process_state(observation, reward):
+def process_state(observation, reward, debug = False):
     """
     Value Meaning
     0 NOOP
@@ -35,7 +37,7 @@ def process_state(observation, reward):
     3 LEFT
     """
     global epoch
-    global debug
+    #global debug
     global average_array
 
     # accumulate observations 
@@ -74,11 +76,11 @@ def process_state(observation, reward):
         racket_col_old = racket_col
         ball_col_old = ball_col
         
-        if racket_col < ball_col:
+        if racket_col - ball_col < -reactivity:
             act = 2 # RIGHT
-        elif racket_col > ball_col:
+        elif racket_col - ball_col > reactivity:
             act = 3 # LEFT
-        else:
+        else: # TODO if ball is NOT visible, otherwise 0 !!!
             act =1
 
         if debug and racket_col == -1:
@@ -134,7 +136,7 @@ action = None
 
 # Reset the environment to generate the first observation
 observation, info = env.reset(seed=42)
-for _ in range(10000):
+while (True):
     # this is where you would insert your policy
     if action is None:
         action = env.action_space.sample()
@@ -143,7 +145,9 @@ for _ in range(10000):
     # receiving the next observation, reward and if the episode has terminated or truncated
     observation, reward, terminated, truncated, info = env.step(action)
     if reward > 0:
-        print(reward)
+        score += reward
+        print(reward,score,scores)
+        #TODO "loost life" on info !!!
 
     debug_count += 1
     if debug_count % 100 == 0:
@@ -155,5 +159,8 @@ for _ in range(10000):
     # If the episode has ended then we can reset to start a new episode
     if terminated or truncated:
         observation, info = env.reset()
+        scores.append(score)
+        score = 0
+
 
 env.close()
