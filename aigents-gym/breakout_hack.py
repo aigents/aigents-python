@@ -2,7 +2,7 @@ import sys
 import numpy as np
 from queue import Queue, Full, Empty
 
-memory_size = 20
+memory_size = 30
 background_refresh_rate = 10
 
 observations = Queue(maxsize=memory_size) 
@@ -19,9 +19,12 @@ def print_debug(array2d):
     #print(len(array2d),len(array2d[0]))
 
 debug = True
-rocket_row = None
+racket_row = None
 diff_vert = None
 average_array = None 
+ball_col_old = None
+racket_col_old = None
+
 
 def process_state(observation, reward):
     """
@@ -50,34 +53,41 @@ def process_state(observation, reward):
         act = 0
     else:
         diff = np.maximum(np.subtract(observation,average_array),0)
-        global rocket_row
+        global racket_row
         global diff_vert
-        if rocket_row is None:
+        if racket_row is None:
             max = 0
             diff_vert = [int(np.sum(d)) for d in diff] 
             for row in range(len(diff_vert)):
                 if diff_vert[row] > max:
                     max = diff_vert[row]
-                    rocket_row = row
-            print(rocket_row)
-        diff_ball = diff[0:rocket_row]
+                    racket_row = row
+            print(racket_row)
+        diff_ball = diff[0:racket_row]
         ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
-        rocket_col = np.argmax(np.convolve(diff[rocket_row], [1,1,1], mode='same'))
+        racket_col = np.argmax(np.convolve(diff[racket_row], [1,1,1], mode='same'))
+
+        global racket_col_old
+        global ball_col_old
+        racket_dir = 0 if racket_col_old is None else racket_col - racket_col_old
+        ball_dir = 0 if ball_col_old is None else ball_col - ball_col_old
+        racket_col_old = racket_col
+        ball_col_old = ball_col
         
-        if rocket_col < ball_col:
+        if racket_col < ball_col:
             act = 2 # RIGHT
-        elif rocket_col > ball_col:
+        elif racket_col > ball_col:
             act = 3 # LEFT
         else:
             act =1
 
-        if debug and rocket_col == -1:
+        if debug and racket_col == -1:
             #print_debug(observation) # OK - binary map raw
             print_debug(diff) # OK - binary map of ball and rocket
             print(diff_vert)
-            print('rocket_row',rocket_row)
-            print(diff[rocket_row])
-            print(ball_col,rocket_col,act)
+            print('racket_row',racket_row)
+            print(diff[racket_row])
+            print(ball_col,racket_col,act)
             print('===')
             try:
                 input("Press enter to continue")
@@ -85,7 +95,7 @@ def process_state(observation, reward):
                 pass
 
         if debug: 
-            print(ball_col,rocket_col,act)
+            print(ball_col,ball_dir,racket_col,racket_dir,act)
 
     return act
 
