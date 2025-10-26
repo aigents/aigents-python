@@ -27,7 +27,7 @@ def process_state(observation, reward):
     """
     Value Meaning
     0 NOOP
-    1 FIRE
+    1 FIRE new ball
     2 RIGHT
     3 LEFT
     """
@@ -120,18 +120,21 @@ if hasattr(env, 'get_action_meanings'):
 
 debug_count = 0
 
-action = None
+# fire new ball
+action = 1
 
 # Reset the environment to generate the first observation
 observation, info = env.reset(seed=42)
 for _ in range(10000):
-    # this is where you would insert your policy
-    if action is None:
-        action = env.action_space.sample()
-
     # step (transition) through the environment with the action
     # receiving the next observation, reward and if the episode has terminated or truncated
-    observation, reward, terminated, truncated, info = env.step(action)
+    raw_observation, reward, terminated, truncated, info = env.step(action)
+    
+    # ignore walls and score
+    observation = np.ndarray((178,144))
+    for i in range(32, len(raw_observation)):
+        observation[i-32] = raw_observation[i][8:152]
+    
     if reward > 0:
         print(reward)
 
@@ -140,10 +143,12 @@ for _ in range(10000):
         #print(observation)
         pass
 
-    action = process_state(observation, reward)
-
-    # If the episode has ended then we can reset to start a new episode
+    # If the episode has ended reset game and fire ball
     if terminated or truncated:
         observation, info = env.reset()
+        action = 1
+        continue
+
+    action = process_state(observation, reward)
 
 env.close()
