@@ -2,7 +2,7 @@ import sys
 import numpy as np
 from queue import Queue, Full, Empty
 
-memory_size = 10
+memory_size = 20
 background_refresh_rate = 10
 
 observations = Queue(maxsize=memory_size) 
@@ -77,6 +77,7 @@ def process_state(observation, reward):
             print(diff_vert)
             print('rocket_row',rocket_row)
             print(diff[rocket_row])
+            print(ball_col,rocket_col,act)
             print('===')
             try:
                 input("Press enter to continue")
