@@ -7,7 +7,8 @@
 #https://gym.openai.com/envs/Breakout-v0/
 #https://github.com/openai/gym/issues/588
 
-import gym
+import ale_py
+import gymnasium as gym
 
 import sys
 import socket
@@ -110,10 +111,12 @@ def compactBy4(a):#numpy.ndarray
 
 
 def serve():
-        #env = gym.make('Pong-v0')
-        #env = gym.make('Breakout-ram-v0')
-        #env = gym.make('Breakout-v0')
-        env = gym.make(getinput("env"));
+        #env = gym.make('PongNoFrameskip-v4', obs_type="ram", render_mode="human") # renders hidden parameters instead of image
+        #env = gym.make('PongNoFrameskip-v4', render_mode="rgb_array")
+        #env = gym.make('BreakoutNoFrameskip-v4', obs_type="ram", render_mode="human") # renders hidden parameters instead of image
+        #env = gym.make('BreakoutNoFrameskip-v4', render_mode="rgb_array")
+        #environment = getinput("env")
+        env = gym.make(getinput("env"), render_mode="rgb_array")
         cycles = int(getinput("cycles"))
         env.reset()
         putout(str(env.action_space))
@@ -121,12 +124,13 @@ def serve():
                 env.render()
                 #action = env.action_space.sample()
                 action = int(getinput("action"))
-                observation, reward, done, info = env.step(action) # take a random action
+                observation, reward, terminated, truncated, info = env.step(action) # take a random action
                 #print(type(observation))#<class 'numpy.ndarray'>
                 #print(tostringa(observation))
                 putout(reward)
+                done = terminated or truncated
                 putout(done)
-                observation = compactBy4(compactRGB(observation))
+                observation = compactBy4(compactRGB(observation))  # should be commented out when using obs_type="ram"
                 #print(observation)
                 #input('111')
                 putout(tostringa(observation))
