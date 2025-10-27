@@ -34,17 +34,17 @@ scores = []
 states = {}
 transitions = {}
 episode = []
+previous_state = None
 
-def count_state(current,previous,value):
+def count_state(current,previous):
+    if not current in states: # count values of transitions
+        states[current] = 0
     if previous is None:
         return
-    if not current in states: # count values of transitions
-        states[current] = value
-    else:
-        states[current] += value
     if not previous in transitions:
         transitions[previous] = set()
     transitions[previous].add(current)
+    #print(f'Addded transition, total {len(transitions)}')
 
 
 def process_state(observation, reward, actions, past_action, feelings, debug = True):
@@ -57,8 +57,7 @@ def process_state(observation, reward, actions, past_action, feelings, debug = T
     """
     global epoch
     global average_array
-
-    previous = None
+    global previous_state # TODO cleanup on game restart!?
 
     # accumulate observations 
     if observations.qsize() == memory_size:
@@ -85,7 +84,7 @@ def process_state(observation, reward, actions, past_action, feelings, debug = T
             #print('racket_row',racket_row)
             #print(diff[racket_row])
             #print(np.heaviside(diff_hor,0))
-            print(debug_array2str(diff_hor_bin,1),past_action,feelings,reward)
+            #print(debug_array2str(diff_hor_bin,1),past_action,feelings,reward)
             if feelings[1] > 0 and False:
                 sys.exit()
                 #try:
@@ -95,9 +94,39 @@ def process_state(observation, reward, actions, past_action, feelings, debug = T
 
 
         state = tuple(list(diff_hor_bin.astype(np.int8)) + list(np.array(past_action + feelings, dtype=np.int8)))
-        count_state(state,previous,reward)
+        count_state(state,previous_state)
+        episode.append(state)
+        previous_state = state
 
-        act = random.choice(actions)
+        if reward != 0:
+            # propagate "global feedback" value
+            for e in episode:
+                states[e] += reward # value all states in episode with no temporal decay
+            if debug and (reward > 0 or reward < -1):
+                print(f'Propagated {reward} to {len(episode)} states')
+                print(len(transitions))
+            episode.clear()
+
+        #TODO make choice
+        chosen_action = None
+        if state in transitions:
+            options = transitions[state]
+            #if debug and len(options) > 0:
+            #    print(f'Choosing from {len(options)} states')
+            vmax = -1000
+            for o in options:
+                action_state = o[len(diff_hor_bin):len(diff_hor_bin)+len(past_action)]
+                a = np.argmax(action_state) # state action
+                v = states[o] # state value
+                if v > vmax:
+                    vmax = v
+                    chosen_action = a
+            if debug:
+                #print(f'Chosen {chosen_action} from {action_state} among {len(options)} states based on {vmax}')
+                pass
+                #sys.exit(0)
+
+        act = random.choice(actions) if chosen_action is None else chosen_action
 
     return act
 
@@ -114,7 +143,8 @@ import gymnasium as gym
 # https://gymnasium.farama.org/v0.28.0/environments/atari/breakout/
 #env = gym.make('Breakout-v4', render_mode='human') # works
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human') # works
-env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
+env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") # works
+#env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale") # works
 
 
 all_actions = None
@@ -165,6 +195,7 @@ while (True):
         observation, info = env.reset()
         scores.append(score)
         score = 0
+        lives = None
 
 
 env.close()

@@ -171,6 +171,7 @@ while (True):
         observation, info = env.reset()
         scores.append(score)
         score = 0
+        lives = None
 
 
 env.close()
