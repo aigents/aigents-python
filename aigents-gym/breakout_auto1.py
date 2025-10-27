@@ -1,10 +1,12 @@
 import sys
+import random
 import numpy as np
 from queue import Queue, Full, Empty
 
 memory_size = 30
 background_refresh_rate = 10
 reactivity = 4
+threshold = 1
 
 observations = Queue(maxsize=memory_size) 
 epoch = 0
@@ -19,7 +21,6 @@ def print_debug(array2d):
         print(debug_array2str(a,1))
     #print(len(array2d),len(array2d[0]))
 
-#debug = True
 racket_row = None
 diff_vert = None
 average_array = None 
@@ -30,7 +31,23 @@ lives = None
 score = 0
 scores = []
 
-def process_state(observation, reward, debug = False):
+states = {}
+transitions = {}
+episode = []
+
+def count_state(current,previous,value):
+    if previous is None:
+        return
+    if not current in states: # count values of transitions
+        states[current] = value
+    else:
+        states[current] += value
+    if not previous in transitions:
+        transitions[previous] = set()
+    transitions[previous].add(current)
+
+
+def process_state(observation, reward, actions, past_action, feelings, debug = True):
     """
     Value Meaning
     0 NOOP
@@ -39,8 +56,9 @@ def process_state(observation, reward, debug = False):
     3 LEFT
     """
     global epoch
-    #global debug
     global average_array
+
+    previous = None
 
     # accumulate observations 
     if observations.qsize() == memory_size:
@@ -54,55 +72,32 @@ def process_state(observation, reward, debug = False):
         average_array = np.mean(observation_maps, axis=0)
     
     if average_array is None:
-        act = 0
+        act = random.choice(actions)
     else:
         diff = np.maximum(np.subtract(observation,average_array),0)
-        global racket_row
-        global diff_vert
-        if racket_row is None:
-            max = 0
-            diff_vert = [int(np.sum(d)) for d in diff] 
-            for row in range(len(diff_vert)):
-                if diff_vert[row] > max:
-                    max = diff_vert[row]
-                    racket_row = row
-            print(racket_row)
-        diff_ball = diff[0:racket_row]
-        ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
-        racket_col = np.argmax(np.convolve(diff[racket_row], [1,1,1], mode='same'))
+        diff_hor = np.mean(diff, axis=0)
+        diff_hor_bin = (diff_hor >= threshold).astype(int)
 
-        global racket_col_old
-        global ball_col_old
-        racket_dir = 0 if racket_col_old is None else racket_col - racket_col_old
-        ball_dir = 0 if ball_col_old is None else ball_col - ball_col_old
-        racket_col_old = racket_col
-        ball_col_old = ball_col
-
-        ball_col_pred = ball_col + ball_dir * 2 # be over-predictive, double the ball speed!?
-        
-        if racket_col - ball_col_pred < -reactivity:
-            act = 2 # RIGHT
-        elif racket_col - ball_col_pred > reactivity:
-            act = 3 # LEFT
-        else: # TODO FIRE if ball is NOT visible, otherwise 0 (NOOP) !!!
-            act = 1 # FIRE 
-
-        if debug and racket_col == -1:
+        if debug:
             #print_debug(observation) # OK - binary map raw
             #print_debug(diff) # OK - binary map of ball and rocket
             #print(diff_vert)
             #print('racket_row',racket_row)
             #print(diff[racket_row])
-            print(ball_col,ball_col_pred,racket_col,act)
-            print('===')
-            try:
-                input("Press enter to continue")
-            except SyntaxError:
-                pass
+            #print(np.heaviside(diff_hor,0))
+            print(debug_array2str(diff_hor_bin,1),past_action,feelings,reward)
+            if feelings[1] > 0 and False:
+                sys.exit()
+                #try:
+                #    input("Press enter to continue")
+                #except SyntaxError:
+                #    pass
 
-        if debug:
-            diff_hor = np.mean(diff, axis=0)
-            print(debug_array2str(diff_hor,1),ball_col,ball_dir,ball_col_pred,racket_col,racket_dir,act)
+
+        state = tuple(list(diff_hor_bin.astype(np.int8)) + list(np.array(past_action + feelings, dtype=np.int8)))
+        count_state(state,previous,reward)
+
+        act = random.choice(actions)
 
     return act
 
@@ -122,10 +117,13 @@ import gymnasium as gym
 env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
 
 
+all_actions = None
+
 # For discrete action spaces (like Atari games)
 if hasattr(env.action_space, 'n'):
     print(f"Total actions: {env.action_space.n}")
-    print("All possible actions:", list(range(env.action_space.n)))
+    all_actions = list(range(env.action_space.n))
+    print("All possible actions:", all_actions)
 
 # Get action meanings
 if hasattr(env, 'get_action_meanings'):
@@ -134,8 +132,6 @@ if hasattr(env, 'get_action_meanings'):
     # Create a mapping of action numbers to their meanings
     for i, meaning in enumerate(action_meanings):
         print(f"Action {i}: {meaning}")
-
-debug_count = 0
 
 action = None
 
@@ -152,19 +148,17 @@ while (True):
 
     if lives == None: # Breakout-specific!!!
         lives = info['lives']
-    reward -= (lives - info['lives']) # decrement reward by "lost life", if the life is lost, according to Igor Pivovarov
+    loss = lives - info['lives']
+    reward -= loss # decrement reward by "lost life", if the life is lost, according to Igor Pivovarov
     lives = info['lives']
 
-    if reward != 0:
+    if reward != 0: # can be negative or positive
         score += reward
         print(reward,info['lives'],score,scores)
 
-    debug_count += 1
-    if debug_count % 100 == 0:
-        #print(observation)
-        pass
-
-    action = process_state(observation, reward, True)
+    past_action = [1 if a == action else 0 for a in all_actions] # binary one-hot action vector
+    feelings = [1 if reward > 0 else 0, 1 if loss > 0 else 0]
+    action = process_state(observation, reward, all_actions, past_action, feelings)
 
     # If the episode has ended then we can reset to start a new episode
     if terminated or truncated:
