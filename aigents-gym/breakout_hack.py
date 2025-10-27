@@ -25,6 +25,8 @@ diff_vert = None
 average_array = None 
 ball_col_old = None
 racket_col_old = None
+
+lives = None
 score = 0
 scores = []
 
@@ -75,21 +77,23 @@ def process_state(observation, reward, debug = False):
         ball_dir = 0 if ball_col_old is None else ball_col - ball_col_old
         racket_col_old = racket_col
         ball_col_old = ball_col
+
+        ball_col_pred = ball_col + ball_dir * 2 # be over-predictive, double the ball speed!?
         
-        if racket_col - ball_col < -reactivity:
+        if racket_col - ball_col_pred < -reactivity:
             act = 2 # RIGHT
-        elif racket_col - ball_col > reactivity:
+        elif racket_col - ball_col_pred > reactivity:
             act = 3 # LEFT
-        else: # TODO if ball is NOT visible, otherwise 0 !!!
-            act =1
+        else: # TODO FIRE if ball is NOT visible, otherwise 0 (NOOP) !!!
+            act = 1 # FIRE 
 
         if debug and racket_col == -1:
             #print_debug(observation) # OK - binary map raw
-            print_debug(diff) # OK - binary map of ball and rocket
-            print(diff_vert)
-            print('racket_row',racket_row)
-            print(diff[racket_row])
-            print(ball_col,racket_col,act)
+            #print_debug(diff) # OK - binary map of ball and rocket
+            #print(diff_vert)
+            #print('racket_row',racket_row)
+            #print(diff[racket_row])
+            print(ball_col,ball_col_pred,racket_col,act)
             print('===')
             try:
                 input("Press enter to continue")
@@ -97,7 +101,7 @@ def process_state(observation, reward, debug = False):
                 pass
 
         if debug: 
-            print(ball_col,ball_dir,racket_col,racket_dir,act)
+            print(ball_col,ball_dir,ball_col_pred,racket_col,racket_dir,act)
 
     return act
 
@@ -144,9 +148,15 @@ while (True):
     # step (transition) through the environment with the action
     # receiving the next observation, reward and if the episode has terminated or truncated
     observation, reward, terminated, truncated, info = env.step(action)
-    if reward > 0:
+
+    if lives == None: # Breakout-specific!!!
+        lives = info['lives']
+    reward -= (lives - info['lives']) # decrement reward by "lost life", if the life is lost, according to Igor Pivovarov
+    lives = info['lives']
+
+    if reward != 0:
         score += reward
-        print(reward,score,scores)
+        print(reward,info['lives'],score,scores)
         #TODO "loost life" on info !!!
 
     debug_count += 1
@@ -154,7 +164,7 @@ while (True):
         #print(observation)
         pass
 
-    action = process_state(observation, reward)
+    action = process_state(observation, reward, False)
 
     # If the episode has ended then we can reset to start a new episode
     if terminated or truncated:
