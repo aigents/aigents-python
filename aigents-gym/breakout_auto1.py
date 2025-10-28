@@ -1,7 +1,7 @@
 import sys
 import random
 import numpy as np
-from queue import Queue, Full, Empty
+from queue import Queue
 
 memory_size = 30
 background_refresh_rate = 10
@@ -30,6 +30,8 @@ racket_col_old = None
 lives = None
 score = 0
 scores = []
+states_log = []
+transitions_log = []
 
 states = {}
 transitions = {}
@@ -98,16 +100,15 @@ def process_state(observation, reward, actions, past_action, feelings, debug = T
         episode.append(state)
         previous_state = state
 
-        if reward != 0:
-            # propagate "global feedback" value
-            for e in episode:
+        assert(reward >= -1)
+        if reward != 0: # both positive and negative feedback
+        #if reward > 0: # positive feedback only
+            for e in episode: # propagate "global feedback" value
                 states[e] += reward # value all states in episode with no temporal decay
-            if debug and (reward > 0 or reward < -1):
-                print(f'Propagated {reward} to {len(episode)} states')
-                print(len(transitions))
+            if debug:
+                print(f'Propagated {reward} to {len(episode)} states of {len(states)}/{len(transitions)}')
             episode.clear()
 
-        #TODO make choice
         chosen_action = None
         if state in transitions:
             options = transitions[state]
@@ -143,9 +144,10 @@ import gymnasium as gym
 # https://gymnasium.farama.org/v0.28.0/environments/atari/breakout/
 #env = gym.make('Breakout-v4', render_mode='human') # works
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human') # works
-env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") # works
-#env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale") # works
+#env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") # works
+env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale") # works
 
+debug_count = 0
 
 all_actions = None
 
@@ -184,18 +186,31 @@ while (True):
 
     if reward != 0: # can be negative or positive
         score += reward
-        print(reward,info['lives'],score,scores)
+        print(reward,info['lives'],score)
 
     past_action = [1 if a == action else 0 for a in all_actions] # binary one-hot action vector
     feelings = [1 if reward > 0 else 0, 1 if loss > 0 else 0]
-    action = process_state(observation, reward, all_actions, past_action, feelings)
+    action = process_state(observation, reward, all_actions, past_action, feelings) if reward >=0 else 1 # HACK: fire if lost the ball!!!??? 
 
     # If the episode has ended then we can reset to start a new episode
     if terminated or truncated:
         observation, info = env.reset()
         scores.append(score)
+        states_log.append(len(states))
+        transitions_log.append(round(float((np.mean([len(transitions[t]) for t in transitions]))),1)) 
         score = 0
         lives = None
+        print('--------------')
+        print(scores)
+        print(states_log)
+        print(transitions_log)
+        print('==============')
+        debug_count += 1
+        #if debug_count > 10:
+        #    break
+
+#for t in transitions:
+#    print(len(transitions[t]))
 
 
 env.close()
