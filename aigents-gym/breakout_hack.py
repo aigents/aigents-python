@@ -5,8 +5,11 @@ from queue import Queue, Full, Empty
 memory_size = 30
 background_refresh_rate = 10
 reactivity = 4
-observation_border = 8 # Hack for Breakout
+
+#observation_top = 0 # Faie
+observation_top = 93 # Hack for Breakout - cut ceiling off
 #observation_border = 0 # Fair
+observation_border = 8 # Hack for Breakout - cut walls off
 
 observations = Queue(maxsize=memory_size) 
 epoch = 0
@@ -16,10 +19,10 @@ def debug_array2str(a,t):
     return ''.join(['.' if i < t else '█' for i in a])
 
 def print_debug(array2d):
+    row = 0
     for a in array2d:
-        #print(a)
-        print(debug_array2str(a,1))
-    #print(len(array2d),len(array2d[0]))
+        print(debug_array2str(a,1),row)
+        row += 1
 
 #debug = True
 racket_row = None
@@ -30,6 +33,11 @@ racket_col_old = None
 
 lives = None
 score = 0
+
+def get_avg_pos(a,t):
+    indexes = np.where(a > t)[0]
+    #print(indexes)
+    return np.mean(indexes)
 
 def process_state(observation, reward, debug = False):
     """
@@ -42,8 +50,10 @@ def process_state(observation, reward, debug = False):
     global epoch
     global average_array
 
-    observation = observation if observation_border == 0 else [o[observation_border:-observation_border] for o in observation]
-    #print(observation)   
+    if observation_top > 0: 
+        observation = observation[observation_top:]
+    if observation_border > 0: 
+        observation = [o[observation_border:-observation_border] for o in observation]
 
     # accumulate observations 
     if observations.qsize() == memory_size:
@@ -71,8 +81,10 @@ def process_state(observation, reward, debug = False):
                     racket_row = row
             #print(racket_row)
         diff_ball = diff[0:racket_row]
-        ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
-        racket_col = np.argmax(np.convolve(diff[racket_row], [1,1,1], mode='same'))
+        #ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
+        #racket_col = np.argmax(np.convolve(diff[racket_row], [1,1,1], mode='same'))
+        ball_col = get_avg_pos(np.mean(diff_ball, axis=0),1)
+        racket_col = get_avg_pos(diff[racket_row],1)
 
         global racket_col_old
         global ball_col_old
@@ -90,7 +102,7 @@ def process_state(observation, reward, debug = False):
         else: # TODO FIRE if ball is NOT visible, otherwise 0 (NOOP) !!!
             act = 1 # FIRE 
 
-        if debug and False:
+        if debug and 0:
             print_debug(observation) # OK - binary map raw
             sys.exit()
             #print_debug(diff) # OK - binary map of ball and rocket
@@ -105,14 +117,17 @@ def process_state(observation, reward, debug = False):
                 pass
 
         if debug:
-            print(debug_array2str(np.mean(diff, axis=0),1),ball_col,ball_dir,ball_col_pred,racket_col,racket_dir,act) # debug output
+            #print(str(np.mean(diff_ball, axis=0)))
+            #print(str(diff[racket_row]))
+            #print(get_avg_pos(np.mean(diff_ball, axis=0),1))
+            #print(get_avg_pos(diff[racket_row],1))
+            #print(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
+            #print(np.convolve(diff[racket_row], [1,1,1], mode='same'))
+            print(debug_array2str(np.mean(diff_ball, axis=0),1),ball_col,ball_dir,ball_col_pred)
+            print(debug_array2str(diff[racket_row],1),racket_col,racket_dir,act)
             pass
 
     return act
-
-
-
-
 
 import ale_py
 import gymnasium as gym
