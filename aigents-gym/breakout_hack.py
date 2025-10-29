@@ -37,7 +37,7 @@ score = 0
 def get_avg_pos(a,t):
     indexes = np.where(a > t)[0]
     #print(indexes)
-    return np.mean(indexes)
+    return np.mean(indexes) if len(indexes) > 0 else None
 
 def process_state(observation, reward, debug = False):
     """
@@ -84,18 +84,20 @@ def process_state(observation, reward, debug = False):
         #ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
         #racket_col = np.argmax(np.convolve(diff[racket_row], [1,1,1], mode='same'))
         ball_col = get_avg_pos(np.mean(diff_ball, axis=0),1)
-        racket_col = get_avg_pos(diff[racket_row],1)
+        racket_col = get_avg_pos(observation[racket_row],1)
 
         global racket_col_old
         global ball_col_old
-        racket_dir = 0 if racket_col_old is None else racket_col - racket_col_old
-        ball_dir = 0 if ball_col_old is None else ball_col - ball_col_old
+        racket_dir = 0 if (racket_col_old is None or racket_col is None) else racket_col - racket_col_old
+        ball_dir = 0 if (ball_col_old is None or ball_col is None) else ball_col - ball_col_old
         racket_col_old = racket_col
         ball_col_old = ball_col
 
-        ball_col_pred = ball_col + ball_dir * 2 # be over-predictive, double the ball speed!?
+        ball_col_pred = ball_col if ball_col is None else ball_col + ball_dir * 2 # be over-predictive, double the ball speed!?
         
-        if racket_col - ball_col_pred < -reactivity:
+        if ball_col is None:
+            act = 1  
+        elif racket_col - ball_col_pred < -reactivity:
             act = 2 # RIGHT
         elif racket_col - ball_col_pred > reactivity:
             act = 3 # LEFT
