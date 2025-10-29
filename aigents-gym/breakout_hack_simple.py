@@ -17,6 +17,9 @@ prev_observation = None
 prev_rocket_size = 0
 #prev_action = 1
 
+score = 0
+scores = []
+
 def process_state(observation, reward):
     """
     Value Meaning
@@ -60,16 +63,16 @@ def process_state(observation, reward):
     # check if ball is in game
     if int(np.sum([int(np.sum(d)) for d in diff_ball])) == 0:
         # return rocket to the center of the screen
-        if rocket_col < 72 - 3:
+        if rocket_col < 72:
             return 2 # RIGHT
-        elif rocket_col > 72 + 3:
+        elif rocket_col > 72:
             return 3 # LEFT
         else:
-            prev_action = 1
+            #prev_action = 1
             return 1 # fire new ball
 
     # I tried to reduce oscillation, but it made lower high score
-    #if rocket_col < ball_col - 5:
+    #if rocket_col < ball_col - 4:
     #    if rocket_col + (prev_rocket_size)/2 > 143:
     #        act = 0 # NOOP - right wall collision
     #        prev_action = 0
@@ -80,7 +83,7 @@ def process_state(observation, reward):
     #        else:
     #            act = 2 # RIGHT
     #            prev_action = 2
-    #elif rocket_col > ball_col + 5:
+    #elif rocket_col > ball_col + 4:
     #    if prev_action == 2:
     #        act = 0 # NOOP - reduce oscillation
     #        prev_action = 3
@@ -133,17 +136,27 @@ def process_state(observation, reward):
 
 import ale_py
 import gymnasium as gym
+
 # https://gymnasium.farama.org/v0.28.0/environments/atari/breakout/
 #env = gym.make('ALE/Breakout-v5', render_mode='human', obs_type="grayscale") 
-#env = gym.make('Breakout-v4', render_mode='human', obs_type="grayscale") 
+#env = gym.make('Breakout-v4', render_mode='human', obs_type="grayscale")
+#env = gym.make('BreakoutNoFrameskip-v4', frameskip = 4, render_mode='human', obs_type="grayscale") 
 env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
+
+#env = gym.make('BreakoutNoFrameskip-v4', render_mode='rgb_array', obs_type="grayscale") 
+#env = gym.wrappers.RecordVideo(
+#    env,
+#    episode_trigger=lambda num: num % 1 == 0,
+#    video_folder="saved-video-folder",
+#    name_prefix="video",
+#)
 
 # get initial state of the game before firing the ball
 action = 0
 
 # Reset the environment to generate the first observation
-observation, info = env.reset(seed=42)
-for _ in range(10000):
+observation, info = env.reset()
+for _ in range(140000):
     # step (transition) through the environment with the action
     # receiving the next observation, reward and if the episode has terminated or truncated
     raw_observation, reward, terminated, truncated, info = env.step(action)
@@ -152,16 +165,20 @@ for _ in range(10000):
     for i in range(32, len(raw_observation)):
         observation[i-32] = raw_observation[i][8:152]
 
-    if debug and reward > 0:
-        print(reward)
+    if reward != 0: # can be negative or positive
+        score += reward
+        if debug:
+            print(reward,info['lives'],score,scores)
 
     # If the episode has ended reset game and fire ball
     if terminated or truncated:
         observation, info = env.reset()
+        scores.append(score)
+        score = 0
         action = 1
-        #continue
-        break
+        continue
 
     action = process_state(observation, reward)
 
+print(scores)
 env.close()
