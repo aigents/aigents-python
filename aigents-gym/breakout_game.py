@@ -7,9 +7,11 @@ import keyboard
 
 #env = gym.make('ALE/Breakout-v5', render_mode='human', obs_type="ram") 
 #env = gym.make('Breakout-v4', render_mode='human', obs_type="ram") 
+#env = gym.make('BreakoutNoFrameskip-v4', frameskip = 4, render_mode='human', obs_type="grayscale") 
 env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="ram") 
 observation, info = env.reset()
 old_lives = 0
+score = 0
 while True:
     """
     Value Meaning
@@ -36,13 +38,17 @@ while True:
 
     observation, reward, terminated, truncated, info = env.step(action)
 
-    if (int(info['lives']) != old_lives):
-        old_lives = int(info['lives'])
+    if (info['lives'] != old_lives):
+        old_lives = info['lives']
         print('lives: ' + str(old_lives))
 
+    if reward != 0: # can be negative or positive
+        score += reward
+    
     if terminated or truncated:
-        print('Game Over. Press any key to restart.')
+        print(f'Game Over. Your score is {int(score)}. Press any key to restart.')
         keyboard.read_key()
         observation, info = env.reset()
 
-    time.sleep(0.02)
+    #time.sleep(0.02)
+    #time.sleep(0.06)

@@ -100,8 +100,9 @@ import gymnasium as gym
 #env = gym.make("LunarLander-v3", render_mode="human") # works
 
 # https://gymnasium.farama.org/v0.28.0/environments/atari/breakout/
-#env = gym.make('Breakout-v4', render_mode='human') # works
-#env = gym.make('BreakoutNoFrameskip-v4', render_mode='human') # works
+#env = gym.make('ALE/Breakout-v5', render_mode='human', obs_type="grayscale") 
+#env = gym.make('Breakout-v4', render_mode='human', obs_type="grayscale")
+#env = gym.make('BreakoutNoFrameskip-v4', frameskip = 4, render_mode='human', obs_type="grayscale") 
 env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
 
 
