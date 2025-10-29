@@ -1,11 +1,13 @@
 import sys
+import random
 import numpy as np
 from queue import Queue, Full, Empty
 
 memory_size = 30
 background_refresh_rate = 10
-reactivity = 4
-
+reactivity_base = 4
+randomness = 2
+ 
 #observation_top = 0 # Faie
 observation_top = 93 # Hack for Breakout - cut ceiling off
 #observation_border = 0 # Fair
@@ -93,8 +95,12 @@ def process_state(observation, reward, debug = False):
         racket_col_old = racket_col
         ball_col_old = ball_col
 
-        ball_col_pred = ball_col if ball_col is None else ball_col + ball_dir * 2 # be over-predictive, double the ball speed!?
+        if ball_col is None:
+            ball_col_pred = len(observation[racket_row]) / 2 # HACK: assume that ball will get into middle by default 
+        else:
+            ball_col_pred = ball_col + ball_dir * 2 # be over-predictive, double the ball speed!?
         
+        reactivity = random.choice(list(range(reactivity_base-randomness,reactivity_base-randomness+1))) # HACK: randomness preventing dead cycles
         if ball_col is None:
             act = 1  
         elif racket_col - ball_col_pred < -reactivity:
@@ -126,7 +132,7 @@ def process_state(observation, reward, debug = False):
             #print(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
             #print(np.convolve(diff[racket_row], [1,1,1], mode='same'))
             print(debug_array2str(np.mean(diff_ball, axis=0),1),ball_col,ball_dir,ball_col_pred)
-            print(debug_array2str(diff[racket_row],1),racket_col,racket_dir,act)
+            print(debug_array2str(diff[racket_row],1),racket_col,racket_dir,act,score)
             pass
 
     return act
@@ -180,7 +186,8 @@ while (True):
 
     if reward != 0:
         score += reward
-        #print(reward,info['lives'],score,scores)
+        if reward < 0:
+            print(reward,info['lives'],score,scores)
 
     debug_count += 1
     if debug_count % 100 == 0:
@@ -195,7 +202,7 @@ while (True):
         scores.append(score)
         score = 0
         lives = None
-        print(scores)
+        print('terminated' if terminated else 'truncated',scores)
         print('==============')
 
 
