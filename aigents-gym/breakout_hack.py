@@ -5,6 +5,8 @@ from queue import Queue, Full, Empty
 memory_size = 30
 background_refresh_rate = 10
 reactivity = 4
+observation_border = 8 # Hack for Breakout
+#observation_border = 0 # Fair
 
 observations = Queue(maxsize=memory_size) 
 epoch = 0
@@ -28,7 +30,6 @@ racket_col_old = None
 
 lives = None
 score = 0
-scores = []
 
 def process_state(observation, reward, debug = False):
     """
@@ -39,8 +40,10 @@ def process_state(observation, reward, debug = False):
     3 LEFT
     """
     global epoch
-    #global debug
     global average_array
+
+    observation = observation if observation_border == 0 else [o[observation_border:-observation_border] for o in observation]
+    #print(observation)   
 
     # accumulate observations 
     if observations.qsize() == memory_size:
@@ -66,7 +69,7 @@ def process_state(observation, reward, debug = False):
                 if diff_vert[row] > max:
                     max = diff_vert[row]
                     racket_row = row
-            print(racket_row)
+            #print(racket_row)
         diff_ball = diff[0:racket_row]
         ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
         racket_col = np.argmax(np.convolve(diff[racket_row], [1,1,1], mode='same'))
@@ -87,8 +90,9 @@ def process_state(observation, reward, debug = False):
         else: # TODO FIRE if ball is NOT visible, otherwise 0 (NOOP) !!!
             act = 1 # FIRE 
 
-        if debug and racket_col == -1:
-            #print_debug(observation) # OK - binary map raw
+        if debug and False:
+            print_debug(observation) # OK - binary map raw
+            sys.exit()
             #print_debug(diff) # OK - binary map of ball and rocket
             #print(diff_vert)
             #print('racket_row',racket_row)
@@ -101,8 +105,8 @@ def process_state(observation, reward, debug = False):
                 pass
 
         if debug:
-            diff_hor = np.mean(diff, axis=0)
-            print(debug_array2str(diff_hor,1),ball_col,ball_dir,ball_col_pred,racket_col,racket_dir,act)
+            print(debug_array2str(np.mean(diff, axis=0),1),ball_col,ball_dir,ball_col_pred,racket_col,racket_dir,act) # debug output
+            pass
 
     return act
 
@@ -119,8 +123,10 @@ import gymnasium as gym
 # https://gymnasium.farama.org/v0.28.0/environments/atari/breakout/
 #env = gym.make('Breakout-v4', render_mode='human') # works
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human') # works
-env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
+#env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
+env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale") 
 
+scores = []
 
 # For discrete action spaces (like Atari games)
 if hasattr(env.action_space, 'n'):
@@ -157,14 +163,14 @@ while (True):
 
     if reward != 0:
         score += reward
-        print(reward,info['lives'],score,scores)
+        #print(reward,info['lives'],score,scores)
 
     debug_count += 1
     if debug_count % 100 == 0:
         #print(observation)
         pass
 
-    action = process_state(observation, reward, True)
+    action = process_state(observation, reward)
 
     # If the episode has ended then we can reset to start a new episode
     if terminated or truncated:
@@ -172,6 +178,8 @@ while (True):
         scores.append(score)
         score = 0
         lives = None
+        print(scores)
+        print('==============')
 
 
 env.close()
