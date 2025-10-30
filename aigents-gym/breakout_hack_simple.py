@@ -141,7 +141,8 @@ import gymnasium as gym
 #env = gym.make('ALE/Breakout-v5', render_mode='human', obs_type="grayscale") 
 #env = gym.make('Breakout-v4', render_mode='human', obs_type="grayscale")
 #env = gym.make('BreakoutNoFrameskip-v4', frameskip = 4, render_mode='human', obs_type="grayscale") 
-env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
+#env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
+env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale") 
 
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='rgb_array', obs_type="grayscale") 
 #env = gym.wrappers.RecordVideo(
@@ -176,6 +177,7 @@ for _ in range(140000):
         scores.append(score)
         score = 0
         action = 1
+        print(scores)
         continue
 
     action = process_state(observation, reward)
