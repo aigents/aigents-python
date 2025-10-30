@@ -6,9 +6,9 @@ from queue import Queue, Full, Empty
 memory_size = 30
 background_refresh_rate = 10
 reactivity_base = 4
-randomness = 2
+randomness = 0
  
-#observation_top = 0 # Faie
+#observation_top = 0 # Fair
 observation_top = 93 # Hack for Breakout - cut ceiling off
 #observation_border = 0 # Fair
 observation_border = 8 # Hack for Breakout - cut walls off
@@ -101,6 +101,8 @@ def process_state(observation, reward, debug = False):
             ball_col_pred = ball_col + ball_dir * 2 # be over-predictive, double the ball speed!?
         
         reactivity = random.choice(list(range(reactivity_base-randomness,reactivity_base-randomness+1))) # HACK: randomness preventing dead cycles
+        assert(not racket_col is None)
+        assert(not ball_col_pred is None)
         if ball_col is None:
             act = 1  
         elif racket_col - ball_col_pred < -reactivity:
@@ -150,6 +152,10 @@ import gymnasium as gym
 env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale") 
 
 scores = []
+stepss = []
+livess = []
+
+steps = 0
 
 # For discrete action spaces (like Atari games)
 if hasattr(env.action_space, 'n'):
@@ -169,7 +175,8 @@ debug_count = 0
 action = None
 
 # Reset the environment to generate the first observation
-observation, info = env.reset(seed=42)
+#observation, info = env.reset(seed=42)
+observation, info = env.reset()
 while (True):
     # this is where you would insert your policy
     if action is None:
@@ -178,6 +185,7 @@ while (True):
     # step (transition) through the environment with the action
     # receiving the next observation, reward and if the episode has terminated or truncated
     observation, reward, terminated, truncated, info = env.step(action)
+    steps += 1
 
     if lives == None: # Breakout-specific!!!
         lives = info['lives']
@@ -200,9 +208,15 @@ while (True):
     if terminated or truncated:
         observation, info = env.reset()
         scores.append(score)
+        stepss.append(steps)
+        livess.append(lives)
         score = 0
+        steps = 0 
         lives = None
-        print('terminated' if terminated else 'truncated',scores)
+        print('terminated' if terminated else 'truncated')
+        print('scores =', scores)
+        print('steps =', stepss)
+        print('lives =', livess)
         print('==============')
 
 

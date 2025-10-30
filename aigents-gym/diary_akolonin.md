@@ -17,6 +17,8 @@ Programmatically determining ball and rocket object position, programmatically o
 Programmatically determining ball and rocket object position, programmatically operating, added "randomnes = 2" to prevent "cycling deadlocks"  
 [414.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0, 558.0]
 
+TODO - fix crashes on start
 TODO - avoid "cycling deadlocks" bugs
+TODO - detect loops?
 TODO - next implement ball_x/rocket_x strategy learning
 
