@@ -33,9 +33,6 @@ average_array = None
 ball_col_old = None
 racket_col_old = None
 
-lives = None
-score = 0
-
 def get_avg_pos(a,t):
     indexes = np.where(a > t)[0]
     #print(indexes)
@@ -134,7 +131,7 @@ def process_state(observation, reward, debug = False):
             #print(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
             #print(np.convolve(diff[racket_row], [1,1,1], mode='same'))
             print(debug_array2str(np.mean(diff_ball, axis=0),1),ball_col,ball_dir,ball_col_pred)
-            print(debug_array2str(diff[racket_row],1),racket_col,racket_dir,act,score)
+            print(debug_array2str(diff[racket_row],1),racket_col,racket_dir,act)
             pass
 
     return act
@@ -156,6 +153,8 @@ stepss = []
 livess = []
 
 steps = 0
+score = 0
+lives = None
 
 # For discrete action spaces (like Atari games)
 if hasattr(env.action_space, 'n'):
@@ -180,7 +179,9 @@ observation, info = env.reset()
 while (True):
     # this is where you would insert your policy
     if action is None:
-        action = env.action_space.sample()
+        action = 2 # env.action_space.sample() # TODO why setting to 0 or 1 crashes on start?
+    else:
+        action = process_state(observation, reward)
 
     # step (transition) through the environment with the action
     # receiving the next observation, reward and if the episode has terminated or truncated
@@ -188,7 +189,7 @@ while (True):
     steps += 1
 
     if lives == None: # Breakout-specific!!!
-        lives = info['lives']
+        lives = info['lives'] # initial amount of lives
     reward -= (lives - info['lives']) # decrement reward by "lost life", if the life is lost, according to Igor Pivovarov
     lives = info['lives']
 
@@ -196,13 +197,6 @@ while (True):
         score += reward
         if reward < 0:
             print(reward,info['lives'],score,scores)
-
-    debug_count += 1
-    if debug_count % 100 == 0:
-        #print(observation)
-        pass
-
-    action = process_state(observation, reward)
 
     # If the episode has ended then we can reset to start a new episode
     if terminated or truncated:
