@@ -17,7 +17,7 @@ def get_avg_pos(a,t):
     #print(indexes)
     return np.mean(indexes) if len(indexes) > 0 else None
 
-class BreakoutProgrammable:
+class BreakoutEvaluatorProgrammable:
 
     def __init__(self,debug):
         self.debug = debug
@@ -98,6 +98,7 @@ class BreakoutProgrammable:
                 ball_col_pred = ball_col + ball_dir * 2 # be over-predictive, double the ball speed!?
             
             reactivity = random.choice(list(range(self.reactivity_base-self.randomness,self.reactivity_base+self.randomness+1))) # HACK: randomness preventing dead cycles
+            
             assert(not racket_col is None)
             assert(not ball_col_pred is None)
             if ball_col is None:
@@ -148,7 +149,7 @@ import gymnasium as gym
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
 env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale")
 
-eval = BreakoutProgrammable(debug=False) 
+eval = BreakoutEvaluatorProgrammable(debug=False) 
 
 scores = []
 stepss = []
