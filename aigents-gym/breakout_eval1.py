@@ -37,8 +37,9 @@ class BreakouEvaluatorXXProgrammable(BreakouEvaluator):
         self.width = width
 
         self.started = False
+        self.prev_racket_size = 0
 
-    def process_state_complex(self, observation, reward):
+    def process_state(self, observation, reward): # Original Anton's version
         (racket_col, ball_col) = observation
         if racket_col is None:
             act = 0
@@ -71,24 +72,28 @@ class BreakouEvaluatorXXProgrammable(BreakouEvaluator):
         return act
     
 
-    def process_state(self, observation, reward):
+    def process_state_simple(self, observation, reward, racket_size): # Latest Vladimir's version adopted by Anton
         (racket_col, ball_col) = observation
         if not self.started:
             self.started = True
             return 1
+
+        if racket_col + racket_size <= self.width - 1: # no right wall collision
+            self.prev_racket_size = racket_size
+
         # check if ball is in game
         if ball_col is None:
-            if random.choice([True, False]):
+            if random.choice([True, False]): # HACK: to fire the ball enventually 
                 return 1
             # return rocket to the center of the screen
-            if racket_col < self.width / 2:
+            if racket_col < self.width / 2: # == 72
                 return 2 # RIGHT
-            elif racket_col > self.width /2:
+            elif racket_col > self.width /2: # == 72
                 return 3 # LEFT
             else:
-                return 1 # fire new ball
+                return 1 # fire new ball # TODO: why do we never get here?
         if racket_col < ball_col - 4:
-            if racket_col + (16)/2 > self.width:
+            if racket_col + self.prev_racket_size/2 > (self.width - 1):
                 act = 0 # NOOP - right wall collision
             else:    
                 act = 2 # RIGHT
@@ -160,8 +165,6 @@ class BreakoutEvaluatorProgrammable(BreakouEvaluator):
         ball_x = get_avg_pos(np.mean(ball_hor, axis=0),1)
         return (racket_x, ball_x)
     
-
-
     def process_state(self, observation, reward):
         """
         Value Meaning
@@ -180,6 +183,7 @@ class BreakoutEvaluatorProgrammable(BreakouEvaluator):
             self.eval = BreakouEvaluatorXXProgrammable(len(observation[self.racket_row]))
 
         act = self.eval.process_state((racket_col, ball_col), reward)
+        #act = self.eval.process_state((racket_col, ball_col), reward, racket_size = np.sum([1 for d in observation[self.racket_row] if d>0]))
 
         if self.debug and 0:
                 try:
