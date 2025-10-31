@@ -43,7 +43,24 @@ class BreakoutEvaluatorProgrammable:
         self.diff = None # maay be not used
 
 
-    #def racket_x(self):
+    def racket_ball_x(self,observation):
+        if self.racket_row is None:
+            max = 0
+            diff_vert = [int(np.sum(d)) for d in self.diff] 
+            for row in range(len(diff_vert)):
+                if diff_vert[row] > max:
+                    max = diff_vert[row]
+                    self.racket_row = row
+
+        #racket_col = np.argmax(np.convolve(diff[racket_row], [1,1,1], mode='same'))
+        racket_x = get_avg_pos(observation[self.racket_row],1)
+
+        #ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
+        ball_hor = observation[0:self.racket_row]
+        ball_x = get_avg_pos(np.mean(ball_hor, axis=0),1)
+
+        return racket_x, ball_x
+    
 
     def process_state(self, observation, reward, debug = False):
         """
@@ -53,6 +70,8 @@ class BreakoutEvaluatorProgrammable:
         2 RIGHT
         3 LEFT
         """
+
+        self.epoch += 1
 
         if self.observation_top > 0: 
             observation = observation[self.observation_top:]
@@ -64,8 +83,6 @@ class BreakoutEvaluatorProgrammable:
             self.observations.get()
         self.observations.put((observation, reward))
 
-        self.epoch += 1
-
         # update background
         if self.epoch % self.background_refresh_rate == 0: 
             self.observation_maps = [a[0] for a in list(self.observations.queue)] # grayscale!
@@ -74,28 +91,15 @@ class BreakoutEvaluatorProgrammable:
         if self.average_array is None:
             act = 0
         else:
-            diff = np.maximum(np.subtract(observation,self.average_array),0)
+            self.diff = np.maximum(np.subtract(observation,self.average_array),0)
 
-            # find racket X
-            if self.racket_row is None:
-                max = 0
-                diff_vert = [int(np.sum(d)) for d in diff] 
-                for row in range(len(diff_vert)):
-                    if diff_vert[row] > max:
-                        max = diff_vert[row]
-                        self.racket_row = row
-                #print(racket_row)
+            # find racket & ball X
+            racket_col, ball_col = self.racket_ball_x(observation)
+            #print(racket_col)
 
-            #racket_col = np.argmax(np.convolve(diff[racket_row], [1,1,1], mode='same'))
-            racket_col = get_avg_pos(observation[self.racket_row],1)
             racket_dir = 0 if (self.racket_col_old is None or racket_col is None) else racket_col - self.racket_col_old
             self.racket_col_old = racket_col
 
-            # find ball X
-            #ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
-            ball_hor = observation[0:self.racket_row]
-
-            ball_col = get_avg_pos(np.mean(ball_hor, axis=0),1)
             ball_dir = 0 if (self.ball_col_old is None or ball_col is None) else ball_col - self.ball_col_old
 
             #if ball_col is None: # HACK - assume ball is not moving if it is not visible
