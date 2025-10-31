@@ -17,86 +17,29 @@ def get_avg_pos(a,t):
     #print(indexes)
     return np.mean(indexes) if len(indexes) > 0 else None
 
-class BreakoutEvaluatorProgrammable:
+# abstract
+class BreakouEvaluator:
+    def __init__(self):
+        pass
 
-    def __init__(self,debug):
-        self.debug = debug
-        self.memory_size = 30
-        self.background_refresh_rate = 10
+    def process_state(self, observation, reward):
+        pass
+
+
+class BreakouEvaluatorXXProgrammable(BreakouEvaluator):
+    def __init__(self,width):
         self.reactivity_base = 4
         self.randomness = 0
-        
-        #self.observation_top = 0 # Fair
-        self.observation_top = 93 # Hack for Breakout - cut ceiling off
-        #self.observation_border = 0 # Fair
-        self.observation_border = 8 # Hack for Breakout - cut walls off
 
-        self.observations = Queue(maxsize=self.memory_size) 
-        self.epoch = 0
-
-        self.racket_row = 96 # None # 96 (with top already cut!?)
-        self.diff_vert = None
-        self.average_array = None 
         self.ball_col_old = None
         self.ball_dir = 0 # ball direction and speed
         self.racket_col_old = None
+        self.width = width
 
-        self.diff = None # maay be not used
+        self.started = False
 
-
-    def racket_ball_x(self,observation):
-        if self.observation_top > 0: 
-            observation = observation[self.observation_top:]
-        if self.observation_border > 0: 
-            observation = [o[self.observation_border:-self.observation_border] for o in observation]
-
-        # accumulate observations in rolling window
-        if self.observations.qsize() == self.memory_size:
-            self.observations.get()
-        self.observations.put((observation, reward))
-
-        # update background
-        if self.epoch % self.background_refresh_rate == 0: 
-            self.observation_maps = [a[0] for a in list(self.observations.queue)] # grayscale!
-            self.average_array = np.mean(self.observation_maps, axis=0)
-
-        if self.racket_row is None:
-
-            if self.average_array is None:
-                return (None, None)
-            
-            self.diff = np.maximum(np.subtract(observation,self.average_array),0)
-            max = 0
-            diff_vert = [int(np.sum(d)) for d in self.diff] 
-            for row in range(len(diff_vert)):
-                if diff_vert[row] > max:
-                    max = diff_vert[row]
-                    self.racket_row = row
-
-        #racket_col = np.argmax(np.convolve(diff[racket_row], [1,1,1], mode='same'))
-        racket_x = get_avg_pos(observation[self.racket_row],1)
-
-        #ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
-        ball_hor = observation[0:self.racket_row]
-        ball_x = get_avg_pos(np.mean(ball_hor, axis=0),1)
-
-        return (racket_x, ball_x)
-    
-
-    def process_state(self, observation, reward, debug = False):
-        """
-        Value Meaning
-        0 NOOP
-        1 FIRE
-        2 RIGHT
-        3 LEFT
-        """
-
-        self.epoch += 1
-
-        # find racket & ball X
-        (racket_col, ball_col) = self.racket_ball_x(observation)
-        
+    def process_state_complex(self, observation, reward):
+        (racket_col, ball_col) = observation
         if racket_col is None:
             act = 0
         else:
@@ -105,7 +48,7 @@ class BreakoutEvaluatorProgrammable:
 
             if ball_col is None: # ball is not "visible"
                 #ball_col_pred = len(observation[self.racket_row]) / 2 # HACK: assume that ball will get into middle by default
-                ball_col_pred = random.choice(list(range(len(observation[self.racket_row])))) # HACK: guess where the ball is randomly
+                ball_col_pred = random.choice(list(range(self.width))) # HACK: guess where the ball is randomly
             else:
                 self.ball_dir = 0 if (self.ball_col_old is None) else ball_col - self.ball_col_old
                 ball_col_pred = ball_col + self.ball_dir * 2 # be over-predictive, double the ball speed!?
@@ -123,26 +66,139 @@ class BreakoutEvaluatorProgrammable:
             elif racket_col - ball_col_pred > reactivity:
                 act = 3 # LEFT
             else: # TODO FIRE if ball is NOT visible, otherwise 0 (NOOP) !!!
-                act = 1 # FIRE 
+                act = 1 # FIRE
 
-            if self.debug and 0:
+        return act
+    
+
+    def process_state(self, observation, reward):
+        (racket_col, ball_col) = observation
+        if not self.started:
+            self.started = True
+            return 1
+        # check if ball is in game
+        if ball_col is None:
+            if random.choice([True, False]):
+                return 1
+            # return rocket to the center of the screen
+            if racket_col < self.width / 2:
+                return 2 # RIGHT
+            elif racket_col > self.width /2:
+                return 3 # LEFT
+            else:
+                return 1 # fire new ball
+        if racket_col < ball_col - 4:
+            if racket_col + (16)/2 > self.width:
+                act = 0 # NOOP - right wall collision
+            else:    
+                act = 2 # RIGHT
+        elif racket_col > ball_col + 4:
+            act = 3 # RIGHT
+        else:
+            act = 0 # NOOP
+        return act
+
+
+class BreakoutEvaluatorProgrammable(BreakouEvaluator):
+
+    def __init__(self,debug):
+        self.debug = debug
+        self.memory_size = 30
+        self.background_refresh_rate = 10
+        
+        #self.observation_top = 0 # Fair
+        self.observation_top = 93 # Hack for Breakout - cut ceiling off
+        #self.observation_border = 0 # Fair
+        self.observation_border = 8 # Hack for Breakout - cut walls off
+
+        self.observations = Queue(maxsize=self.memory_size) 
+        self.epoch = 0
+
+        self.racket_row = 96 # None # 96 (with top already cut!?)
+        self.diff_vert = None
+        self.average_array = None 
+
+        self.ball_col_old = None
+        self.ball_dir = 0 # ball direction and speed
+        self.racket_col_old = None
+
+        self.diff = None # may be not used
+
+        self.eval = None
+
+    def process_observation(self,observation):
+        if self.observation_top > 0: 
+            observation = observation[self.observation_top:]
+        if self.observation_border > 0: 
+            observation = [o[self.observation_border:-self.observation_border] for o in observation]
+        # accumulate observations in rolling window
+        if self.observations.qsize() == self.memory_size:
+            self.observations.get()
+        self.observations.put((observation, reward))
+        # update background
+        self.epoch += 1
+        if self.epoch % self.background_refresh_rate == 0: 
+            self.observation_maps = [a[0] for a in list(self.observations.queue)] # grayscale!
+            self.average_array = np.mean(self.observation_maps, axis=0)
+        return observation
+
+    def racket_ball_x(self,observation):
+        if self.racket_row is None:
+            if self.average_array is None:
+                return (None, None)
+            self.diff = np.maximum(np.subtract(observation,self.average_array),0)
+            max = 0
+            diff_vert = [int(np.sum(d)) for d in self.diff] 
+            for row in range(len(diff_vert)):
+                if diff_vert[row] > max:
+                    max = diff_vert[row]
+                    self.racket_row = row
+        #racket_col = np.argmax(np.convolve(diff[racket_row], [1,1,1], mode='same'))
+        racket_x = get_avg_pos(observation[self.racket_row],1)
+        #ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
+        ball_hor = observation[0:self.racket_row]
+        ball_x = get_avg_pos(np.mean(ball_hor, axis=0),1)
+        return (racket_x, ball_x)
+    
+
+
+    def process_state(self, observation, reward):
+        """
+        Value Meaning
+        0 NOOP
+        1 FIRE
+        2 RIGHT
+        3 LEFT
+        """
+
+        observation = self.process_observation(observation)
+
+        # find racket & ball X
+        (racket_col, ball_col) = self.racket_ball_x(observation)
+
+        if self.eval is None:
+            self.eval = BreakouEvaluatorXXProgrammable(len(observation[self.racket_row]))
+
+        act = self.eval.process_state((racket_col, ball_col), reward)
+
+        if self.debug and 0:
                 try:
                     input("Press enter to continue")
                 except SyntaxError:
                     pass
 
-            if self.debug:
+        if self.debug:
                 #print(str(np.mean(diff_ball, axis=0)))
                 #print(str(diff[racket_row]))
                 #print(get_avg_pos(np.mean(diff_ball, axis=0),1))
                 #print(get_avg_pos(diff[racket_row],1))
                 #print(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
                 #print(np.convolve(diff[racket_row], [1,1,1], mode='same'))
-                print(debug_array2str(np.mean(observation[self.observation_top:self.observation_top+self.racket_row], axis=0),1),ball_col,self.ball_dir,ball_col_pred)
-                print(debug_array2str(observation[self.observation_top+self.racket_row],1),self.racket_row,racket_col,racket_dir,act)
-                pass
+                print(debug_array2str(np.mean(observation[0:self.racket_row], axis=0),1),ball_col,self.ball_dir)
+                print(debug_array2str(observation[self.racket_row],1),self.racket_row,racket_col,act)
 
         return act
+
 
 import ale_py
 import gymnasium as gym
@@ -153,10 +209,10 @@ import gymnasium as gym
 # https://gymnasium.farama.org/v0.28.0/environments/atari/breakout/
 #env = gym.make('Breakout-v4', render_mode='human') # works
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human') # works
-env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
-#env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale")
+#env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
+env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale")
 
-eval = BreakoutEvaluatorProgrammable(debug=True) 
+eval = BreakoutEvaluatorProgrammable(debug=False) 
 
 scores = []
 stepss = []
