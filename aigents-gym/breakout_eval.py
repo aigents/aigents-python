@@ -87,16 +87,15 @@ class BreakoutEvaluatorProgrammable:
         if self.epoch % self.background_refresh_rate == 0: 
             self.observation_maps = [a[0] for a in list(self.observations.queue)] # grayscale!
             self.average_array = np.mean(self.observation_maps, axis=0)
+
+        if not self.average_array is None:
+            self.diff = np.maximum(np.subtract(observation,self.average_array),0)
+            # find racket & ball X
+            racket_col, ball_col = self.racket_ball_x(observation)
         
         if self.average_array is None:
             act = 0
         else:
-            self.diff = np.maximum(np.subtract(observation,self.average_array),0)
-
-            # find racket & ball X
-            racket_col, ball_col = self.racket_ball_x(observation)
-            #print(racket_col)
-
             racket_dir = 0 if (self.racket_col_old is None or racket_col is None) else racket_col - self.racket_col_old
             self.racket_col_old = racket_col
 

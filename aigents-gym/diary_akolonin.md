@@ -68,8 +68,6 @@ lives = [0, 0, 0]
 
 # TODO
 
-TODO - make class
-TODO - test fixed randomness
 TODO - make it working programmatically with small field and rball_X, rocket_X states
 TODO - learn to play in [rball_X, rocket_X] space
 TODO - fix crashes on start HACK: act = 2
