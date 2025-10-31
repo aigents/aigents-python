@@ -40,6 +40,10 @@ class BreakoutEvaluatorProgrammable:
         self.ball_col_old = None
         self.racket_col_old = None
 
+        self.diff = None # maay be not used
+
+
+    #def racket_x(self):
 
     def process_state(self, observation, reward, debug = False):
         """
@@ -89,9 +93,9 @@ class BreakoutEvaluatorProgrammable:
 
             # find ball X
             #ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
-            diff_ball = diff[0:self.racket_row]
+            ball_hor = observation[0:self.racket_row]
 
-            ball_col = get_avg_pos(np.mean(diff_ball, axis=0),1)
+            ball_col = get_avg_pos(np.mean(ball_hor, axis=0),1)
             ball_dir = 0 if (self.ball_col_old is None or ball_col is None) else ball_col - self.ball_col_old
 
             #if ball_col is None: # HACK - assume ball is not moving if it is not visible
