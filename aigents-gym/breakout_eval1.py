@@ -39,7 +39,7 @@ class BreakouEvaluatorXXProgrammable(BreakouEvaluator):
         self.started = False
         self.prev_racket_size = 0
 
-    def process_state(self, observation, reward): # Original Anton's version
+    def process_state_complex(self, observation, reward): # Original Anton's version
         (racket_col, ball_col) = observation
         if racket_col is None:
             act = 0
@@ -72,13 +72,15 @@ class BreakouEvaluatorXXProgrammable(BreakouEvaluator):
         return act
     
 
-    def process_state_simple(self, observation, reward, racket_size): # Latest Vladimir's version adopted by Anton
+    def process_state(self, observation, reward, racket_size): # Latest Vladimir's version adopted by Anton
         (racket_col, ball_col) = observation
         if not self.started:
             self.started = True
             return 1
 
-        if racket_col + racket_size <= self.width - 1: # no right wall collision
+        #print(self.width - 1,self.width /2)
+
+        if racket_col + racket_size/2 <= (self.width - 1): # 143 # no right wall collision
             self.prev_racket_size = racket_size
 
         # check if ball is in game
@@ -93,7 +95,7 @@ class BreakouEvaluatorXXProgrammable(BreakouEvaluator):
             else:
                 return 1 # fire new ball # TODO: why do we never get here?
         if racket_col < ball_col - 4:
-            if racket_col + self.prev_racket_size/2 > (self.width - 1):
+            if racket_col + self.prev_racket_size/2 > (self.width - 1): # 143
                 act = 0 # NOOP - right wall collision
             else:    
                 act = 2 # RIGHT
@@ -182,8 +184,8 @@ class BreakoutEvaluatorProgrammable(BreakouEvaluator):
         if self.eval is None:
             self.eval = BreakouEvaluatorXXProgrammable(len(observation[self.racket_row]))
 
-        act = self.eval.process_state((racket_col, ball_col), reward)
-        #act = self.eval.process_state((racket_col, ball_col), reward, racket_size = np.sum([1 for d in observation[self.racket_row] if d>0]))
+        #act = self.eval.process_state((racket_col, ball_col), reward)
+        act = self.eval.process_state((racket_col, ball_col), reward, racket_size = np.sum([1 for d in observation[self.racket_row] if d>0]))
 
         if self.debug and 0:
                 try:
@@ -239,7 +241,7 @@ if hasattr(env, 'get_action_meanings'):
     for i, meaning in enumerate(action_meanings):
         print(f"Action {i}: {meaning}")
 
-max_steps = 18000 # according to Igor Pivoarov!
+max_steps = 990000 # 18000 # according to Igor Pivoarov!
 
 action = None
 
@@ -277,7 +279,7 @@ while (True):
         score = 0
         steps = 0 
         lives = None
-        print('terminated' if terminated else 'truncated' if truncated else '18000 steps limit')
+        print('terminated' if terminated else 'truncated' if truncated else f'{max_steps} steps limit')
         print('scores =', scores)
         print('steps =', stepss)
         print('lives =', livess)
