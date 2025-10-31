@@ -34,10 +34,11 @@ class BreakoutEvaluatorProgrammable:
         self.observations = Queue(maxsize=self.memory_size) 
         self.epoch = 0
 
-        self.racket_row = 96 # None # 96
+        self.racket_row = 96 # None # 96 (with top already cut!?)
         self.diff_vert = None
         self.average_array = None 
         self.ball_col_old = None
+        self.ball_dir = 0 # ball direction and speed
         self.racket_col_old = None
 
         self.diff = None # maay be not used
@@ -99,20 +100,17 @@ class BreakoutEvaluatorProgrammable:
         if racket_col is None:
             act = 0
         else:
-            racket_dir = 0 if (self.racket_col_old is None or racket_col is None) else racket_col - self.racket_col_old
+            racket_dir = 0 if (self.racket_col_old is None or racket_col is None) else racket_col - self.racket_col_old # not used, for debugging 
             self.racket_col_old = racket_col
 
-            ball_dir = 0 if (self.ball_col_old is None or ball_col is None) else ball_col - self.ball_col_old
-
-            #if ball_col is None: # HACK - assume ball is not moving if it is not visible
-            #    ball_col = self.ball_col_old   
-
-            self.ball_col_old = ball_col
-
-            if ball_col is None:
-                ball_col_pred = len(observation[self.racket_row]) / 2 # HACK: assume that ball will get into middle by default
+            if ball_col is None: # ball is not "visible"
+                #ball_col_pred = len(observation[self.racket_row]) / 2 # HACK: assume that ball will get into middle by default
+                ball_col_pred = random.choice(list(range(len(observation[self.racket_row])))) # HACK: guess where the ball is randomly
             else:
-                ball_col_pred = ball_col + ball_dir * 2 # be over-predictive, double the ball speed!?
+                self.ball_dir = 0 if (self.ball_col_old is None) else ball_col - self.ball_col_old
+                ball_col_pred = ball_col + self.ball_dir * 2 # be over-predictive, double the ball speed!?
+    
+            self.ball_col_old = ball_col
 
             reactivity = random.choice(list(range(self.reactivity_base-self.randomness,self.reactivity_base+self.randomness+1))) # HACK: randomness preventing dead cycles
             
@@ -189,7 +187,7 @@ if hasattr(env, 'get_action_meanings'):
     for i, meaning in enumerate(action_meanings):
         print(f"Action {i}: {meaning}")
 
-debug_count = 0
+max_steps = 18000 # according to Igor Pivoarov!
 
 action = None
 
@@ -219,7 +217,7 @@ while (True):
             print(reward,info['lives'],score,scores)
 
     # If the episode has ended then we can reset to start a new episode
-    if terminated or truncated:
+    if terminated or truncated or steps == max_steps:
         observation, info = env.reset()
         scores.append(score)
         stepss.append(steps)
@@ -227,7 +225,7 @@ while (True):
         score = 0
         steps = 0 
         lives = None
-        print('terminated' if terminated else 'truncated')
+        print('terminated' if terminated else 'truncated' if truncated else '18000 steps limit')
         print('scores =', scores)
         print('steps =', stepss)
         print('lives =', livess)
