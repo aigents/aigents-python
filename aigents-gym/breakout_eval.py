@@ -71,6 +71,8 @@ class BreakoutEvaluatorProgrammable:
             act = 0
         else:
             diff = np.maximum(np.subtract(observation,self.average_array),0)
+
+            # find racket X
             if self.racket_row is None:
                 max = 0
                 diff_vert = [int(np.sum(d)) for d in diff] 
@@ -79,24 +81,29 @@ class BreakoutEvaluatorProgrammable:
                         max = diff_vert[row]
                         self.racket_row = row
                 #print(racket_row)
-            diff_ball = diff[0:self.racket_row]
-            #ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
+
             #racket_col = np.argmax(np.convolve(diff[racket_row], [1,1,1], mode='same'))
-
-            ball_col = get_avg_pos(np.mean(diff_ball, axis=0),1)
-            ball_dir = 0 if (self.ball_col_old is None or ball_col is None) else ball_col - self.ball_col_old
-            self.ball_col_old = ball_col
-
             racket_col = get_avg_pos(observation[self.racket_row],1)
             racket_dir = 0 if (self.racket_col_old is None or racket_col is None) else racket_col - self.racket_col_old
             self.racket_col_old = racket_col
 
+            # find ball X
+            #ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
+            diff_ball = diff[0:self.racket_row]
+
+            ball_col = get_avg_pos(np.mean(diff_ball, axis=0),1)
+            ball_dir = 0 if (self.ball_col_old is None or ball_col is None) else ball_col - self.ball_col_old
+
+            #if ball_col is None: # HACK - assume ball is not moving if it is not visible
+            #    ball_col = self.ball_col_old   
+
+            self.ball_col_old = ball_col
+
             if ball_col is None:
                 ball_col_pred = len(observation[self.racket_row]) / 2 # HACK: assume that ball will get into middle by default
-                #TODO previous ball position?
             else:
                 ball_col_pred = ball_col + ball_dir * 2 # be over-predictive, double the ball speed!?
-            
+
             reactivity = random.choice(list(range(self.reactivity_base-self.randomness,self.reactivity_base+self.randomness+1))) # HACK: randomness preventing dead cycles
             
             assert(not racket_col is None)
