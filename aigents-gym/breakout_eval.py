@@ -44,7 +44,27 @@ class BreakoutEvaluatorProgrammable:
 
 
     def racket_ball_x(self,observation):
+        if self.observation_top > 0: 
+            observation = observation[self.observation_top:]
+        if self.observation_border > 0: 
+            observation = [o[self.observation_border:-self.observation_border] for o in observation]
+
+        # accumulate observations in rolling window
+        if self.observations.qsize() == self.memory_size:
+            self.observations.get()
+        self.observations.put((observation, reward))
+
+        # update background
+        if self.epoch % self.background_refresh_rate == 0: 
+            self.observation_maps = [a[0] for a in list(self.observations.queue)] # grayscale!
+            self.average_array = np.mean(self.observation_maps, axis=0)
+
         if self.racket_row is None:
+
+            if self.average_array is None:
+                return (None, None)
+            
+            self.diff = np.maximum(np.subtract(observation,self.average_array),0)
             max = 0
             diff_vert = [int(np.sum(d)) for d in self.diff] 
             for row in range(len(diff_vert)):
@@ -73,27 +93,10 @@ class BreakoutEvaluatorProgrammable:
 
         self.epoch += 1
 
-        if self.observation_top > 0: 
-            observation = observation[self.observation_top:]
-        if self.observation_border > 0: 
-            observation = [o[self.observation_border:-self.observation_border] for o in observation]
-
-        # accumulate observations in rolling window
-        if self.observations.qsize() == self.memory_size:
-            self.observations.get()
-        self.observations.put((observation, reward))
-
-        # update background
-        if self.epoch % self.background_refresh_rate == 0: 
-            self.observation_maps = [a[0] for a in list(self.observations.queue)] # grayscale!
-            self.average_array = np.mean(self.observation_maps, axis=0)
-
-        if not self.average_array is None:
-            self.diff = np.maximum(np.subtract(observation,self.average_array),0)
-            # find racket & ball X
-            racket_col, ball_col = self.racket_ball_x(observation)
+        # find racket & ball X
+        racket_col, ball_col = self.racket_ball_x(observation)
         
-        if self.average_array is None:
+        if racket_col is None:
             act = 0
         else:
             racket_dir = 0 if (self.racket_col_old is None or racket_col is None) else racket_col - self.racket_col_old
