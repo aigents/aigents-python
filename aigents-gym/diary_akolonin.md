@@ -66,6 +66,14 @@ scores = [437.0, 400.0, 503.0]
 steps = [12371, 10231, 19519]
 lives = [0, 0, 0]
 
+Programmatically set racket_row, rest is the same
+
+randomnes/reactivity=4/0:
+truncated
+scores = [426.0, 405.0, 405.0, 405.0, 405.0, 405.0]
+steps = [108000, 108000, 108000, 108000, 108000, 108000]
+lives = [4, 5, 5, 5, 5, 5]
+
 # TODO
 
 TODO - make it working programmatically with small field and rball_X, rocket_X states

@@ -34,7 +34,7 @@ class BreakoutEvaluatorProgrammable:
         self.observations = Queue(maxsize=self.memory_size) 
         self.epoch = 0
 
-        self.racket_row = None # 96
+        self.racket_row = 96 # None # 96
         self.diff_vert = None
         self.average_array = None 
         self.ball_col_old = None
@@ -79,7 +79,7 @@ class BreakoutEvaluatorProgrammable:
         ball_hor = observation[0:self.racket_row]
         ball_x = get_avg_pos(np.mean(ball_hor, axis=0),1)
 
-        return racket_x, ball_x
+        return (racket_x, ball_x)
     
 
     def process_state(self, observation, reward, debug = False):
@@ -94,7 +94,7 @@ class BreakoutEvaluatorProgrammable:
         self.epoch += 1
 
         # find racket & ball X
-        racket_col, ball_col = self.racket_ball_x(observation)
+        (racket_col, ball_col) = self.racket_ball_x(observation)
         
         if racket_col is None:
             act = 0
