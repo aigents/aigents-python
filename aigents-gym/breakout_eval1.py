@@ -241,14 +241,15 @@ if hasattr(env, 'get_action_meanings'):
     for i, meaning in enumerate(action_meanings):
         print(f"Action {i}: {meaning}")
 
-max_steps = 990000 # 18000 # according to Igor Pivoarov!
-
+max_steps = 18000 # 18000 # according to Igor Pivoarov! (but games are truncated at 108000) 
+max_games = 10
+game = 0
 action = None
 
 # Reset the environment to generate the first observation
 #observation, info = env.reset(seed=42)
 observation, info = env.reset()
-while (True):
+while (game < max_games):
     # this is where you would insert your policy
     if action is None:
         action = 2 # env.action_space.sample() # TODO why setting to 0 or 1 crashes on start?
@@ -280,10 +281,10 @@ while (True):
         steps = 0 
         lives = None
         print('terminated' if terminated else 'truncated' if truncated else f'{max_steps} steps limit')
-        print('scores =', scores)
-        print('steps =', stepss)
-        print('lives =', livess)
+        print('scores =', scores, round(np.mean(scores),1))
+        print('steps =', stepss, round(np.mean(stepss),1))
+        print('lives =', livess, round(np.mean(livess),1))
         print('==============')
-
+        game += 1
 
 env.close()

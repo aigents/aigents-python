@@ -81,3 +81,17 @@ TODO - learn to play in [rball_X, rocket_X] space - implement ball_x/rocket_x st
 TODO - fix crashes on start HACK: act = 2
 TODO - avoid "cycling deadlocks" bugs
 TODO - detect loops?
+
+## Spaces - can be packed in series (transitions and N-transitions)):
+Xball+Xrock+Act
+Xball+Xrock+Yrock+Act
+Xproj+Yproj+Act GS binary
+Xproj+Yproj+Act GS binary / compact by 2
+Xproj+Yproj+Act GS binary / compact by 4
+
+* can add Rewared and Punish and Lives
+
+## Playing modes (in any of the spaces above):
+Programmatic
+Programmatic->Model->PastExperiential
+ProExperiential->Model->PastExperiential
