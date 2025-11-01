@@ -3,30 +3,9 @@ import random
 import numpy as np
 from queue import Queue, Full, Empty
 
-def debug_array2str(a,t):
-    return ''.join(['.' if i < t else '█' for i in a])
+from player import *
 
-def print_debug(array2d):
-    row = 0
-    for a in array2d:
-        print(debug_array2str(a,1),row)
-        row += 1
-
-def get_avg_pos(a,t):
-    indexes = np.where(a > t)[0]
-    #print(indexes)
-    return np.mean(indexes) if len(indexes) > 0 else None
-
-# abstract
-class BreakouEvaluator:
-    def __init__(self):
-        pass
-
-    def process_state(self, observation, reward):
-        pass
-
-
-class BreakouEvaluatorXXProgrammable(BreakouEvaluator):
+class BreakoutXXProgrammable(GymPlayer):
     def __init__(self,width):
         self.reactivity_base = 4
         self.randomness = 0
@@ -106,7 +85,7 @@ class BreakouEvaluatorXXProgrammable(BreakouEvaluator):
         return act
 
 
-class BreakoutEvaluatorProgrammable(BreakouEvaluator):
+class BreakoutProgrammable(GymPlayer):
 
     def __init__(self,debug):
         self.debug = debug
@@ -182,7 +161,7 @@ class BreakoutEvaluatorProgrammable(BreakouEvaluator):
         (racket_col, ball_col) = self.racket_ball_x(observation)
 
         if self.eval is None:
-            self.eval = BreakouEvaluatorXXProgrammable(len(observation[self.racket_row]))
+            self.eval = BreakoutXXProgrammable(len(observation[self.racket_row]))
 
         #act = self.eval.process_state((racket_col, ball_col), reward)
         act = self.eval.process_state((racket_col, ball_col), reward, racket_size = np.sum([1 for d in observation[self.racket_row] if d>0]))
@@ -218,7 +197,7 @@ import gymnasium as gym
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
 env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale")
 
-eval = BreakoutEvaluatorProgrammable(debug=False) 
+eval = BreakoutProgrammable(debug=False) 
 
 scores = []
 stepss = []
