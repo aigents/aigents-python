@@ -76,7 +76,6 @@ lives = [4, 5, 5, 5, 5, 5]
 
 # TODO
 
-TODO - make it working programmatically with small field and rball_X, rocket_X states
 TODO - learn to play in [rball_X, rocket_X] space - implement ball_x/rocket_x strategy learning
 TODO - fix crashes on start HACK: act = 2
 TODO - avoid "cycling deadlocks" bugs
