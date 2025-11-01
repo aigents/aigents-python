@@ -2,6 +2,7 @@ import ale_py
 import gymnasium as gym
 import numpy as np
 
+from basic import *
 from player import *
 
 # Initialise the environment
@@ -13,11 +14,13 @@ from player import *
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
 env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale")
 
-eval = BreakoutProgrammable(debug=False) 
+model = model_new()
+eval = BreakoutProgrammable(model=model,debug=False) 
 
 scores = []
 stepss = []
 livess = []
+states = []
 
 steps = 0
 score = 0
@@ -37,7 +40,7 @@ if hasattr(env, 'get_action_meanings'):
         print(f"Action {i}: {meaning}")
 
 max_steps = 18000 # 18000 # according to Igor Pivoarov! (but games are truncated at 108000) 
-max_games = 10
+max_games = 100
 game = 0
 reward = 0
 action = None
@@ -50,7 +53,7 @@ while (game < max_games):
     if action is None:
         action = 2 # env.action_space.sample() # TODO why setting to 0 or 1 crashes on start?
     else:
-        action = eval.process_state(observation, reward)
+        action = eval.process_state(observation, reward, action) # pass previous action in 
 
     # step (transition) through the environment with the action
     # receiving the next observation, reward and if the episode has terminated or truncated
@@ -76,10 +79,15 @@ while (game < max_games):
         score = 0
         steps = 0 
         lives = None
+        # TODO action = 1 !?
         print('terminated' if terminated else 'truncated' if truncated else f'{max_steps} steps limit')
         print('scores =', scores, round(np.mean(scores),1))
         print('steps =', stepss, round(np.mean(stepss),1))
         print('lives =', livess, round(np.mean(livess),1))
+        if not model is None:
+            states.append(len(model['states']))
+            print('states =', states)
+            model_write_file(f'programmatic{game}',model)
         print('==============')
         game += 1
 

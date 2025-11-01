@@ -18,6 +18,7 @@ class BreakoutXXProgrammable(GymPlayer):
         self.started = False
         self.prev_racket_size = 0
 
+
     def process_state_complex(self, observation, reward): # Original Anton's version
         (racket_col, ball_col) = observation
         if racket_col is None:
@@ -87,7 +88,7 @@ class BreakoutXXProgrammable(GymPlayer):
 
 class BreakoutProgrammable(GymPlayer):
 
-    def __init__(self,debug):
+    def __init__(self,model=None,debug=False):
         self.debug = debug
         self.memory_size = 30
         self.background_refresh_rate = 10
@@ -112,7 +113,10 @@ class BreakoutProgrammable(GymPlayer):
 
         self.eval = None
 
-    def process_observation(self,observation,reward):
+        self.model = model
+        self.states = []
+
+    def process_observation(self,observation,reward,previous_action):
         if self.observation_top > 0: 
             observation = observation[self.observation_top:]
         if self.observation_border > 0: 
@@ -146,7 +150,7 @@ class BreakoutProgrammable(GymPlayer):
         ball_x = get_avg_pos(np.mean(ball_hor, axis=0),1)
         return (racket_x, ball_x)
     
-    def process_state(self, observation, reward):
+    def process_state(self, observation, reward, previous_action):
         """
         Value Meaning
         0 NOOP
@@ -154,11 +158,15 @@ class BreakoutProgrammable(GymPlayer):
         2 RIGHT
         3 LEFT
         """
-
-        observation = self.process_observation(observation,reward)
+        observation = self.process_observation(observation,reward,previous_action)
 
         # find racket & ball X
         (racket_col, ball_col) = self.racket_ball_x(observation)
+
+        if not self.model is None:
+            if reward != 0:
+                model_add_states(self.model,self.states,reward)
+            self.states.append((1 if reward > 0 else 0,0 if reward < 0 else 1)+(previous_action,)+(racket_col, ball_col))
 
         if self.eval is None:
             self.eval = BreakoutXXProgrammable(len(observation[self.racket_row]))

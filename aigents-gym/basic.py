@@ -27,7 +27,7 @@ def model_new():
     return {'steps':0, 'games':0, 'states':{}, 'transitions':{}}
 
 def model_read_file(model_name):
-    model_path += '.pkl'
+    model_path = model_name + '.pkl'
     if os.path.exists(model_path):
         with open(model_path, 'rb') as f:
             data = pickle.load(f)
@@ -36,12 +36,12 @@ def model_read_file(model_name):
         return model_new()
 
 def model_write_file(model_name, model):
-    model_path += '.pkl'
+    model_path = model_name + '.pkl'
     with open(model_path, 'wb') as f:
         pickle.dump(model, f)
 
 #TODO optional exponentional reward deccay
-def model_add_memory(model,states,global_feeddback):
+def model_add_states(model,states,global_feeddback):
     """
     Add emotinally valuable episode of N of states with some global feeddback
     """
@@ -66,10 +66,10 @@ def model_add_memory(model,states,global_feeddback):
         previous = state
     return model
 
-assert(str(model_add_memory(model_new(),[],0))=="{'steps': 0, 'games': 0, 'states': {}, 'transitions': {}}")
-assert(str(model_add_memory(model_new(),[(0,0),(0,1)],0))=="{'steps': 2, 'games': 0, 'states': {(0, 0): (0, 1, {(0, 1): (0, 1)}), (0, 1): (0, 1, {})}, 'transitions': {}}")
-assert(str(model_add_memory(model_new(),[(0,0),(0,1),(0,0),(0,1)],0))=="{'steps': 4, 'games': 0, 'states': {(0, 0): (0, 2, {(0, 1): (0, 2)}), (0, 1): (0, 2, {(0, 0): (0, 1)})}, 'transitions': {}}")
-assert(str(model_add_memory(model_new(),[(0,0),(0,1),(0,0),(0,1)],1))=="{'steps': 4, 'games': 0, 'states': {(0, 0): (2, 2, {(0, 1): (2, 2)}), (0, 1): (2, 2, {(0, 0): (1, 1)})}, 'transitions': {}}")
+assert(str(model_add_states(model_new(),[],0))=="{'steps': 0, 'games': 0, 'states': {}, 'transitions': {}}")
+assert(str(model_add_states(model_new(),[(0,0),(0,1)],0))=="{'steps': 2, 'games': 0, 'states': {(0, 0): (0, 1, {(0, 1): (0, 1)}), (0, 1): (0, 1, {})}, 'transitions': {}}")
+assert(str(model_add_states(model_new(),[(0,0),(0,1),(0,0),(0,1)],0))=="{'steps': 4, 'games': 0, 'states': {(0, 0): (0, 2, {(0, 1): (0, 2)}), (0, 1): (0, 2, {(0, 0): (0, 1)})}, 'transitions': {}}")
+assert(str(model_add_states(model_new(),[(0,0),(0,1),(0,0),(0,1)],1))=="{'steps': 4, 'games': 0, 'states': {(0, 0): (2, 2, {(0, 1): (2, 2)}), (0, 1): (2, 2, {(0, 0): (1, 1)})}, 'transitions': {}}")
 
 
 
@@ -78,7 +78,7 @@ class GymPlayer:
     def __init__(self):
         pass
 
-    def process_state(self, observation, reward):
+    def process_state(self, observation, reward, previous_action):
         pass
 
 
