@@ -163,7 +163,7 @@ class BreakoutProgrammable(GymPlayer):
 
         # find racket & ball X
         (racket_col, ball_col) = self.racket_ball_x(observation)
-        state = (1 if reward > 0 else 0,1 if reward < 0 else 0)+(previous_action,)+(racket_col, ball_col)
+        state = (previous_action,)+(1 if reward > 0 else 0,1 if reward < 0 else 0)+(racket_col, ball_col)
 
         if not self.model is None:
             if reward != 0:
@@ -218,19 +218,28 @@ class BreakoutModelDriven(BreakoutProgrammable):
 
         # find racket & ball X
         (racket_col, ball_col) = self.racket_ball_x(observation)
-        state = (1 if reward > 0 else 0,1 if reward < 0 else 0)+(previous_action,)+(racket_col, ball_col)
+        state = (previous_action,)+(1 if reward > 0 else 0,1 if reward < 0 else 0)+(racket_col, ball_col)
         print(state)
 
         states = self.model['states']
         try:
-            (utility,count,transtions) = states[state]
+            found = states[state]
             print('found exact',utility,count,len(transtions))
         except KeyError:
-            similar = find_similar(states,state) 
-            if similar is None:
-                print("not found")
-            else:
-                (utility,count,transtions) = similar
-                pass #TODO
-        
+            found = find_similar(states,state)
+
+        if found is None:
+            print("not found")
+        else:
+            (utility,count,transitions) = found
+            max_utility = 0
+            best = None
+            for t in transitions:
+                (t_utility,t_count) = transitions[t]
+                if max_utility < t_utility:
+                    max_utility = t_utility
+                    best = t
+            if not best is None:
+                return best(0)
+
         return random.choice(self.actions)
