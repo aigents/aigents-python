@@ -76,7 +76,6 @@ lives = [4, 5, 5, 5, 5, 5]
 
 # TODO
 TODO - add timing
-TODO - move averages to separate line
 TODO - record 100-games model programatically - re-run model generation with fixed negative feedback bug
 TODO - reporduce this model by model-based player
 
@@ -87,8 +86,10 @@ TODO - avoid "cycling deadlocks" bugs
 TODO - detect loops?
 
 ## Spaces - can be packed in series (transitions and N-transitions)):
-Xball+Xrock+Act
-Xball+Xrock+Yrock+Act
+Xball+Xrock+Act (Numeric) *
+Xball+Xrock+Act (1-hot)
+Xball+Xrock+Yrock+Act (Numeric)
+Xball+Xrock+Yrock+Act (1-hot)
 Xproj+Yproj+Act GS binary
 Xproj+Yproj+Act GS binary / compact by 2
 Xproj+Yproj+Act GS binary / compact by 4

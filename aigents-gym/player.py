@@ -64,7 +64,7 @@ class BreakoutXXProgrammable(GymPlayer):
             self.prev_racket_size = racket_size
 
         # check if ball is in game
-        if ball_col is None:
+        if ball_col == INT_NONE:
             if random.choice([True, False]): # HACK: to fire the ball enventually 
                 return 1
             # return rocket to the center of the screen
@@ -135,7 +135,7 @@ class BreakoutProgrammable(GymPlayer):
     def racket_ball_x(self,observation):
         if self.racket_row is None:
             if self.average_array is None:
-                return (None, None)
+                return (INT_NONE, INT_NONE)
             self.diff = np.maximum(np.subtract(observation,self.average_array),0)
             max = 0
             diff_vert = [int(np.sum(d)) for d in self.diff] 
@@ -148,7 +148,7 @@ class BreakoutProgrammable(GymPlayer):
         #ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
         ball_hor = observation[0:self.racket_row]
         ball_x = get_avg_pos(np.mean(ball_hor, axis=0),1)
-        return (racket_x, ball_x)
+        return (INT_NONE if racket_x is None else int(round(racket_x)), INT_NONE if ball_x is None else int(round(ball_x)))
 
 
     def process_state(self, observation, reward, previous_action):
@@ -195,10 +195,22 @@ class BreakoutProgrammable(GymPlayer):
         return act
 
 
+def find_similar(states,state):
+    max_sim = 0
+    best = None
+    for s in states:
+        print(s,state)
+        sim = cosine_similarity(s,state)
+        if max_sim < sim:
+            max_sim = sim
+            best = s
+    return best
+
+
 class BreakoutModelDriven(BreakoutProgrammable):
 
     def __init__(self,actions,model=None,debug=False):
-        super().__init__(model)
+        super().__init__(model,debug)
         self.actions = actions
 
     def process_state(self, observation, reward, previous_action):
@@ -207,12 +219,18 @@ class BreakoutModelDriven(BreakoutProgrammable):
         # find racket & ball X
         (racket_col, ball_col) = self.racket_ball_x(observation)
         state = (1 if reward > 0 else 0,1 if reward < 0 else 0)+(previous_action,)+(racket_col, ball_col)
+        print(state)
 
         states = self.model['states']
         try:
             (utility,count,transtions) = states[state]
-            print('found',utility,count,len(transtions))
+            print('found exact',utility,count,len(transtions))
         except KeyError:
-            print("not found")
+            similar = find_similar(states,state) 
+            if similar is None:
+                print("not found")
+            else:
+                (utility,count,transtions) = similar
+                pass #TODO
         
         return random.choice(self.actions)

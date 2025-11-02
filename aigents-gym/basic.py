@@ -1,7 +1,9 @@
-import os
+import os, sys
 import numpy as np
 import pickle
- 
+
+INT_NONE = -sys.maxsize - 1
+
 def debug_array2str(a,t):
     return ''.join(['.' if i < t else '█' for i in a])
 
@@ -13,9 +15,10 @@ def print_debug(array2d):
 
 def get_avg_pos(a,t):
     indexes = np.where(a > t)[0]
-    #print(indexes)
     return np.mean(indexes) if len(indexes) > 0 else None
 
+def cosine_similarity(a,b):
+    return np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b))
 
 def model_new():
     """
