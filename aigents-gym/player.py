@@ -149,7 +149,8 @@ class BreakoutProgrammable(GymPlayer):
         ball_hor = observation[0:self.racket_row]
         ball_x = get_avg_pos(np.mean(ball_hor, axis=0),1)
         return (racket_x, ball_x)
-    
+
+
     def process_state(self, observation, reward, previous_action):
         """
         Value Meaning
@@ -162,11 +163,12 @@ class BreakoutProgrammable(GymPlayer):
 
         # find racket & ball X
         (racket_col, ball_col) = self.racket_ball_x(observation)
+        state = (1 if reward > 0 else 0,1 if reward < 0 else 0)+(previous_action,)+(racket_col, ball_col)
 
         if not self.model is None:
             if reward != 0:
                 model_add_states(self.model,self.states,reward)
-            self.states.append((1 if reward > 0 else 0,0 if reward < 0 else 1)+(previous_action,)+(racket_col, ball_col))
+            self.states.append(state)
 
         if self.eval is None:
             self.eval = BreakoutXXProgrammable(len(observation[self.racket_row]))
@@ -193,3 +195,24 @@ class BreakoutProgrammable(GymPlayer):
         return act
 
 
+class BreakoutModelDriven(BreakoutProgrammable):
+
+    def __init__(self,actions,model=None,debug=False):
+        super().__init__(model)
+        self.actions = actions
+
+    def process_state(self, observation, reward, previous_action):
+        observation = self.process_observation(observation,reward,previous_action)
+
+        # find racket & ball X
+        (racket_col, ball_col) = self.racket_ball_x(observation)
+        state = (1 if reward > 0 else 0,1 if reward < 0 else 0)+(previous_action,)+(racket_col, ball_col)
+
+        states = self.model['states']
+        try:
+            (utility,count,transtions) = states[state]
+            print('found',utility,count,len(transtions))
+        except KeyError:
+            print("not found")
+        
+        return random.choice(self.actions)

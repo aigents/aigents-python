@@ -75,7 +75,12 @@ steps = [108000, 108000, 108000, 108000, 108000, 108000]
 lives = [4, 5, 5, 5, 5, 5]
 
 # TODO
+TODO - add timing
+TODO - move averages to separate line
+TODO - record 100-games model programatically - re-run model generation with fixed negative feedback bug
+TODO - reporduce this model by model-based player
 
+TODO - try to learn this model 
 TODO - learn to play in [rball_X, rocket_X] space - implement ball_x/rocket_x strategy learning
 TODO - fix crashes on start HACK: act = 2
 TODO - avoid "cycling deadlocks" bugs

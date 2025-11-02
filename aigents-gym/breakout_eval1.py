@@ -14,18 +14,6 @@ from player import *
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
 env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale")
 
-model = model_new()
-eval = BreakoutProgrammable(model=model,debug=False) 
-
-scores = []
-stepss = []
-livess = []
-states = []
-
-steps = 0
-score = 0
-lives = None
-
 # For discrete action spaces (like Atari games)
 if hasattr(env.action_space, 'n'):
     print(f"Total actions: {env.action_space.n}")
@@ -38,6 +26,19 @@ if hasattr(env, 'get_action_meanings'):
     # Create a mapping of action numbers to their meanings
     for i, meaning in enumerate(action_meanings):
         print(f"Action {i}: {meaning}")
+
+model = model_new()
+eval = BreakoutProgrammable(model=model,debug=False)
+#eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model_read_file("./models/breakout/programmatic99"),debug=False) 
+
+scores = []
+stepss = []
+livess = []
+states = []
+
+steps = 0
+score = 0
+lives = None
 
 max_steps = 18000 # 18000 # according to Igor Pivoarov! (but games are truncated at 108000) 
 max_games = 100
@@ -80,10 +81,11 @@ while (game < max_games):
         steps = 0 
         lives = None
         # TODO action = 1 !?
-        print('terminated' if terminated else 'truncated' if truncated else f'{max_steps} steps limit')
-        print('scores =', scores, round(np.mean(scores),1))
-        print('steps =', stepss, round(np.mean(stepss),1))
-        print('lives =', livess, round(np.mean(livess),1))
+        print(f"cause={'terminated' if terminated else 'truncated' if truncated else f'{max_steps}_steps_limit'}, " +
+              f"scores={round(np.mean(scores),1)}, steps={round(np.mean(stepss),1)}, lives={round(np.mean(livess),1)}")
+        print('scores =', scores)
+        print('steps =', stepss)
+        print('lives =', livess)
         if not model is None:
             states.append(len(model['states']))
             print('states =', states)
