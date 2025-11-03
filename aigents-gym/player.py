@@ -195,16 +195,18 @@ class BreakoutProgrammable(GymPlayer):
         return act
 
 
-def find_similar(states,state):
+def find_similar(states,state,count_threshold):
     max_sim = 0
     best = None
-    for s in states:
+    for s, utility_count in states.items():
         #print(s,state)
+        if utility_count[1] < count_threshold: # disregard rare evidence
+            continue
         sim = cosine_similarity(s,state)
         if max_sim < sim:
             max_sim = sim
             best = s
-    return states[s]
+    return states[best] if not best is None else None
 
 
 class BreakoutModelDriven(BreakoutProgrammable):
@@ -225,11 +227,12 @@ class BreakoutModelDriven(BreakoutProgrammable):
             found = states[state]
             match = 'exact'
         except KeyError:
-            found = find_similar(states,state)
+            found = find_similar(states,state,2) # HACK: threshold!?
             match = 'exact'
 
         if not found is None:
             (utility,count,transitions) = found
+            #print('found',match,state,'=>',found,'=',len(transitions))
             max_utility = 0
             best = None
             for t in transitions:
