@@ -28,10 +28,10 @@ if hasattr(env, 'get_action_meanings'):
     for i, meaning in enumerate(action_meanings):
         print(f"Action {i}: {meaning}")
 
-model = model_new()
-eval = BreakoutProgrammable(model=model,debug=False)
-#model = None
-#eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model_read_file("./models/breakout/programmatic99"),debug=False) 
+#model = model_new()
+#eval = BreakoutProgrammable(model=model,debug=False)
+model = None
+eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model_read_file("./models/breakout/programmatic99"),debug=False) 
 
 scores = []
 stepss = []

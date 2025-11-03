@@ -209,6 +209,23 @@ def find_similar(states,state,count_threshold):
     return states[best] if not best is None else None
 
 
+def find_useful(transitions,utility_thereshold,count_threshold):
+    max_utility = 0
+    best = None
+    for s, utility_count in transitions.items():
+        utility, count = utility_count
+        if utility < utility_thereshold: # disregard low utility
+            continue
+        if count < count_threshold: # disregard rare evidence
+            continue
+        if max_utility < utility:
+            max_utility = utility
+            best = s
+    if not best is None:
+        #print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
+        return best
+
+
 class BreakoutModelDriven(BreakoutProgrammable):
 
     def __init__(self,actions,model=None,debug=False):
@@ -233,13 +250,7 @@ class BreakoutModelDriven(BreakoutProgrammable):
         if not found is None:
             (utility,count,transitions) = found
             #print('found',match,state,'=>',found,'=',len(transitions))
-            max_utility = 0
-            best = None
-            for t in transitions:
-                (t_utility,t_count) = transitions[t]
-                if max_utility < t_utility:
-                    max_utility = t_utility
-                    best = t
+            best = find_useful(transitions,0,1)
             if not best is None:
                 #print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
                 return best[0]
