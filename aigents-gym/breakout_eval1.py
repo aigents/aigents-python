@@ -11,8 +11,8 @@ from player import *
 # https://gymnasium.farama.org/v0.28.0/environments/atari/breakout/
 #env = gym.make('Breakout-v4', render_mode='human') # works
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human') # works
-#env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
-env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale")
+env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
+#env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale")
 
 # For discrete action spaces (like Atari games)
 if hasattr(env.action_space, 'n'):
@@ -27,9 +27,9 @@ if hasattr(env, 'get_action_meanings'):
     for i, meaning in enumerate(action_meanings):
         print(f"Action {i}: {meaning}")
 
-model = model_new()
-eval = BreakoutProgrammable(model=model,debug=False)
-#eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model_read_file("./models/breakout/programmatic99"),debug=False) 
+#model = model_new()
+#eval = BreakoutProgrammable(model=model,debug=False)
+eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model_read_file("./models/breakout/programmatic99"),debug=False) 
 
 scores = []
 stepss = []

@@ -199,12 +199,12 @@ def find_similar(states,state):
     max_sim = 0
     best = None
     for s in states:
-        print(s,state)
+        #print(s,state)
         sim = cosine_similarity(s,state)
         if max_sim < sim:
             max_sim = sim
             best = s
-    return best
+    return states[s]
 
 
 class BreakoutModelDriven(BreakoutProgrammable):
@@ -219,18 +219,16 @@ class BreakoutModelDriven(BreakoutProgrammable):
         # find racket & ball X
         (racket_col, ball_col) = self.racket_ball_x(observation)
         state = (previous_action,)+(1 if reward > 0 else 0,1 if reward < 0 else 0)+(racket_col, ball_col)
-        print(state)
 
         states = self.model['states']
         try:
             found = states[state]
-            print('found exact',utility,count,len(transtions))
+            match = 'exact'
         except KeyError:
             found = find_similar(states,state)
+            match = 'exact'
 
-        if found is None:
-            print("not found")
-        else:
+        if not found is None:
             (utility,count,transitions) = found
             max_utility = 0
             best = None
@@ -240,6 +238,8 @@ class BreakoutModelDriven(BreakoutProgrammable):
                     max_utility = t_utility
                     best = t
             if not best is None:
-                return best(0)
+                #print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
+                return best[0]
 
+        print("found none")
         return random.choice(self.actions)
