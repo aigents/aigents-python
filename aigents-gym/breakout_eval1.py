@@ -12,8 +12,8 @@ from player import *
 # https://gymnasium.farama.org/v0.28.0/environments/atari/breakout/
 #env = gym.make('Breakout-v4', render_mode='human') # works
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human') # works
-#env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
-env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale")
+env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
+#env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale")
 
 # For discrete action spaces (like Atari games)
 if hasattr(env.action_space, 'n'):
@@ -31,8 +31,8 @@ if hasattr(env, 'get_action_meanings'):
 #model = None
 #model = model_new()
 #model=model_read_file("./test")
-model=model_read_file("./models/breakout/programmatic99")
-#eval = BreakoutProgrammable(model=model,debug=False)
+model=model_read_file("./models/breakout/episodic")
+#eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
 eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=0,debug=False) 
 
 scores = []
@@ -46,7 +46,7 @@ score = 0
 lives = None
 
 max_steps = 18000 # 18000 # according to Igor Pivoarov! (but games are truncated at 108000) 
-max_games = 10
+max_games = 100
 game = 0
 reward = 0
 action = None
@@ -101,7 +101,7 @@ while (game < max_games):
             states.append(len(model['states']))
             print('states =', states)
             #model_write_file(f'programmatic{game}',model)
-            model_write_file(f'test',model)
+            model_write_file(f'episodic',model)
         print('==============')
         game += 1
 

@@ -38,7 +38,7 @@ def get_avg_pos(a,t):
     #print(indexes)
     return np.mean(indexes) if len(indexes) > 0 else None
 
-def process_state(observation, reward, debug = False):
+def process_state(observation, reward, debug = True):
     """
     Value Meaning
     0 NOOP
@@ -145,8 +145,8 @@ import gymnasium as gym
 # https://gymnasium.farama.org/v0.28.0/environments/atari/breakout/
 #env = gym.make('Breakout-v4', render_mode='human') # works
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human') # works
-#env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
-env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale") 
+env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
+#env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale") 
 
 scores = []
 stepss = []

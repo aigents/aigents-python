@@ -75,6 +75,7 @@ steps = [108000, 108000, 108000, 108000, 108000, 108000]
 lives = [4, 5, 5, 5, 5, 5]
 
 # TODO
+TODO - re-run experiment with learing XY by manual - with TRUNCATED states *
 TODO - learn to play in [rball_X, rocket_X] space - implement ball_x/rocket_x strategy learning
 - + utility threshold on transitions
 - + similarity threshold on similars

@@ -46,7 +46,7 @@ def model_write_file(model_name, model):
 #TODO optional exponentional reward deccay
 def model_add_states(model,states,global_feeddback):
     """
-    Add emotinally valuable episode of N of states with some global feeddback
+    Add emotionally valuable episode of N of states with some global feeddback
     """
     model['steps'] += len(states)
     model_states = model['states']
