@@ -77,6 +77,7 @@ lives = [4, 5, 5, 5, 5, 5]
 # TODO
 TODO - learn to play in [rball_X, rocket_X] space - implement ball_x/rocket_x strategy learning
 - + utility threshold on transitions
+- + similarity threshold on similars
 TODO - reporduce the "follow-the master" model by model-based player with generative randomness
 TODO - fix crashes on start HACK: act = 2
 TODO - avoid "cycling deadlocks" bugs

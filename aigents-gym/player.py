@@ -228,9 +228,10 @@ def find_useful(transitions,utility_thereshold,count_threshold):
 
 class BreakoutModelDriven(BreakoutProgrammable):
 
-    def __init__(self,actions,model=None,debug=False):
+    def __init__(self,actions,model=None,learn_mode=0,debug=False):
         super().__init__(model,debug)
         self.actions = actions
+        self.learn_mode = learn_mode
 
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)
@@ -238,6 +239,15 @@ class BreakoutModelDriven(BreakoutProgrammable):
         # find racket & ball X
         (racket_col, ball_col) = self.racket_ball_x(observation)
         state = (previous_action,)+(1 if reward > 0 else 0,1 if reward < 0 else 0)+(racket_col, ball_col)
+
+        if not self.model is None and self.learn_mode != 0:
+            if reward != 0:
+                if self.learn_mode == 1:
+                    feeddback = reward if reward > 0 else 0 # positive only
+                else:
+                    feedback = reward # positive or negative
+                model_add_states(self.model,self.states,feedback)
+            self.states.append(state)
 
         states = self.model['states']
         try:
