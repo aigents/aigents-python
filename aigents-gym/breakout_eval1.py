@@ -89,8 +89,8 @@ while (game < max_games):
         steps = 0 
         lives = None
         # TODO action = 1 !?
-        print(f"cause=\"{'terminated' if terminated else 'truncated' if truncated else f'{max_steps}_steps_limit'}\", " +
-              f"score={round(np.mean(scores),1)}, steps={round(np.mean(stepss),1)}, lives={round(np.mean(livess),1)}, lapse={str(lapse)}")
+        print(f"cause=\"{'terminated' if terminated else 'truncated' if truncated else f'{max_steps}_steps_limit'}\"; " +
+              f"score={round(np.mean(scores),1)}; steps={round(np.mean(stepss),1)}; lives={round(np.mean(livess),1)}; lapse=\"{str(lapse)}\"")
         print('scores =', scores)
         print('stepss =', stepss)
         print('livess =', livess)

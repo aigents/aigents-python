@@ -75,9 +75,8 @@ steps = [108000, 108000, 108000, 108000, 108000, 108000]
 lives = [4, 5, 5, 5, 5, 5]
 
 # TODO
-TODO - add timing - time by game, don't suptract lost life from the score *
-TODO - re-test learning with the above
 TODO - learn to play in [rball_X, rocket_X] space - implement ball_x/rocket_x strategy learning
+- + utility threshold on transitions
 TODO - reporduce the "follow-the master" model by model-based player with generative randomness
 TODO - fix crashes on start HACK: act = 2
 TODO - avoid "cycling deadlocks" bugs
