@@ -195,7 +195,7 @@ class BreakoutProgrammable(GymPlayer):
         return act
 
 
-def find_similar(states,state,count_threshold):
+def find_similar(states,state,count_threshold,similarity_threshold):
     max_sim = 0
     best = None
     for s, utility_count in states.items():
@@ -203,14 +203,19 @@ def find_similar(states,state,count_threshold):
         if utility_count[1] < count_threshold: # disregard rare evidence
             continue
         sim = cosine_similarity(s,state)
+        if sim < similarity_threshold:
+            continue
         if max_sim < sim:
             max_sim = sim
             best = s
+    #if not best is None:
+    #    print('similarity',max_sim)
     return states[best] if not best is None else None
 
 
 def find_useful(transitions,utility_thereshold,count_threshold):
     max_utility = 0
+    max_count = 0
     best = None
     for s, utility_count in transitions.items():
         utility, count = utility_count
@@ -220,9 +225,10 @@ def find_useful(transitions,utility_thereshold,count_threshold):
             continue
         if max_utility < utility:
             max_utility = utility
+            max_count = count
             best = s
     if not best is None:
-        #print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
+        #print('found',max_utility,max_count,len(transitions),best[0] if not best is None else '-')
         return best
 
 
@@ -243,7 +249,7 @@ class BreakoutModelDriven(BreakoutProgrammable):
         if not self.model is None and self.learn_mode != 0:
             if reward != 0:
                 if self.learn_mode == 1:
-                    feeddback = reward if reward > 0 else 0 # positive only
+                    feedback = reward if reward > 0 else 0 # positive only
                 else:
                     feedback = reward # positive or negative
                 model_add_states(self.model,self.states,feedback)
@@ -254,7 +260,7 @@ class BreakoutModelDriven(BreakoutProgrammable):
             found = states[state]
             match = 'exact'
         except KeyError:
-            found = find_similar(states,state,2) # HACK: threshold!?
+            found = find_similar(states,state,2,0.99) # HACK: threshold!?
             match = 'exact'
 
         if not found is None:

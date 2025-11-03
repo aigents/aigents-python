@@ -28,10 +28,12 @@ if hasattr(env, 'get_action_meanings'):
     for i, meaning in enumerate(action_meanings):
         print(f"Action {i}: {meaning}")
 
+#model = None
 #model = model_new()
+#model=model_read_file("./test")
+model=model_read_file("./models/breakout/programmatic99")
 #eval = BreakoutProgrammable(model=model,debug=False)
-model = None
-eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model_read_file("./models/breakout/programmatic99"),debug=False) 
+eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=0,debug=False) 
 
 scores = []
 stepss = []
@@ -98,7 +100,8 @@ while (game < max_games):
         if not model is None:
             states.append(len(model['states']))
             print('states =', states)
-            model_write_file(f'programmatic{game}',model)
+            #model_write_file(f'programmatic{game}',model)
+            model_write_file(f'test',model)
         print('==============')
         game += 1
 
