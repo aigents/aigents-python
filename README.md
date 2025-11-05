@@ -8,8 +8,8 @@ Python API to Aigents backend/core and experienttial learning experiments
 #### Using Python 3.11.13
 
 1. Make sure you have Python3 pip and vitualenv installed, see https://1cloud.ru/help/linux/ustanovka-jupyter-notebook-na-ubuntu-18-04 *(do this only once)*
-1. git clone https://gitlab.com/aigents/pygents.git *(do this only once)*
-1. cd pygents
+1. git clone https://github.com/aigents/aigents-python.git *(do this only once)*
+1. cd aigents-python
 1. virtualenv env *or* python -m venv env *(do this only once)*
 1. . env/bin/activate *(. ./env/Scripts/activate [- if under Windows](https://mothergeo-py.readthedocs.io/en/latest/development/how-to/venv-win.html))*
 1. pip install -r pygents/requirements.txt *(do this only once)*
