@@ -100,7 +100,7 @@ while (game < max_games):
         if game == (max_games - 1):
             grand_t1 = t1
             total_time = grand_t1 - grand_t0
-            print(f"score_avg={round(np.mean(scores),1)}; steps_avg={round(np.mean(stepss),1)}; lives_avg={round(np.mean(livess),1)}; lapse_avg=\"{str(lapse)}\", time=\"{str(total_time)}\"")
+            print(f"score_avg={round(np.mean(scores),1)}; steps_avg={round(np.mean(stepss),1)}; lives_avg={round(np.mean(livess),1)}; lapse_avg=\"{str(lapse)}\"; time=\"{str(total_time)}\"")
             print('scores =', scores)
             print('stepss =', stepss)
             print('livess =', livess)
