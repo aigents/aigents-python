@@ -21,7 +21,7 @@ Python API to Aigents backend/core and experienttial learning experiments
 1. `ssh -i <yourkey>.pem -N -f -L localhost:9999:localhost:8888 <yourusername>@<yourhost>` (do this in terminal)
 1. http://localhost:9999/ (access this in the browser)
 
-## Containments
+## Contents
 
 1. [Aigents Backend API and Tools](https://github.com/aigents/aigents-python/tree/main/aigents-python)
 1. [Experiential Learning with Open AI Gym](https://github.com/aigents/aigents-python/tree/main/aigents-gym)
