@@ -12,8 +12,8 @@ from player import *
 # https://gymnasium.farama.org/v0.28.0/environments/atari/breakout/
 #env = gym.make('Breakout-v4', render_mode='human') # works
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human') # works
-env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
-#env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale")
+#env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
+env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale")
 
 # For discrete action spaces (like Atari games)
 if hasattr(env.action_space, 'n'):
@@ -29,11 +29,11 @@ if hasattr(env, 'get_action_meanings'):
         print(f"Action {i}: {meaning}")
 
 #model = None
-#model = model_new()
+model = model_new()
 #model=model_read_file("./test")
-model=model_read_file("./models/breakout/episodic")
+#model=model_read_file("./models/breakout/episodic")
 #eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
-eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=0,debug=False) 
+eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=1,debug=False) 
 
 scores = []
 stepss = []
@@ -46,7 +46,7 @@ score = 0
 lives = None
 
 max_steps = 18000 # 18000 # according to Igor Pivoarov! (but games are truncated at 108000) 
-max_games = 100
+max_games = 10000 # 100
 game = 0
 reward = 0
 action = None
@@ -54,6 +54,7 @@ action = None
 # Reset the environment to generate the first observation
 #observation, info = env.reset(seed=42)
 t0 = dt.datetime.now()
+grand_t0 = t0
 observation, info = env.reset()
 while (game < max_games):
     # this is where you would insert your policy
@@ -72,10 +73,11 @@ while (game < max_games):
     reward -= (lives - info['lives']) # decrement reward by "lost life" if the life is lost (to pass it to the next process_state)!
     lives = info['lives']
 
-    if reward > 0: #TODO don't subtract lives from rewards!
+    if reward > 0: # don't subtract lives from rewards!
         score += reward
     elif reward < 0:
-        print(reward,info['lives'],score,scores)
+        #print(reward,info['lives'],score,scores)
+        pass
 
     # If the episode has ended then we can reset to start a new episode
     if terminated or truncated or steps == max_steps:
@@ -83,26 +85,29 @@ while (game < max_games):
         lapse = t1 - t0
         t0 = t1
         observation, info = env.reset()
+        print(f"game={game} cause=\"{'terminated' if terminated else 'truncated' if truncated else f'{max_steps}_limit'}\"; " +
+              f"score={score}; steps={steps}; lives={lives}; lapse=\"{str(lapse)}\"")
         scores.append(score)
         stepss.append(steps)
         livess.append(lives)
         lapses.append(round(lapse.total_seconds()))
+        if not model is None:
+            states.append(len(model['states']))
         score = 0
         steps = 0 
         lives = None
         # TODO action = 1 !?
-        print(f"cause=\"{'terminated' if terminated else 'truncated' if truncated else f'{max_steps}_steps_limit'}\"; " +
-              f"score={round(np.mean(scores),1)}; steps={round(np.mean(stepss),1)}; lives={round(np.mean(livess),1)}; lapse=\"{str(lapse)}\"")
-        print('scores =', scores)
-        print('stepss =', stepss)
-        print('livess =', livess)
-        print('lapses =', lapses)
-        if not model is None:
-            states.append(len(model['states']))
-            print('states =', states)
-            #model_write_file(f'programmatic{game}',model)
-            model_write_file(f'episodic',model)
-        print('==============')
+        if game == (max_games - 1):
+            grand_t1 = t1
+            total_time = grand_t1 - grand_t0
+            print(f"score_avg={round(np.mean(scores),1)}; steps_avg={round(np.mean(stepss),1)}; lives_avg={round(np.mean(livess),1)}; lapse_avg=\"{str(lapse)}\", time=\"{str(total_time)}\"")
+            print('scores =', scores)
+            print('stepss =', stepss)
+            print('livess =', livess)
+            print('lapses =', lapses)
+            if not model is None:
+                print('states =', states)
+                model_write_file(f'episodic',model)
         game += 1
 
 env.close()
