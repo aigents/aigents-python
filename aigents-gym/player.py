@@ -201,14 +201,14 @@ class BreakoutProgrammable(GymPlayer):
         return act
 
 
-def find_similar(states,state,count_threshold,similarity_threshold):
+def find_similar(states,state,state_count_threshold,state_similarity_threshold):
     max_sim = 0
     bests = []
     for s, utility_count in states.items():
-        if utility_count[1] < count_threshold: # disregard rare evidence
+        if utility_count[1] < state_count_threshold: # disregard rare evidence
             continue
         sim = cosine_similarity(s,state)
-        if sim < similarity_threshold:
+        if sim < state_similarity_threshold:
             continue
         if max_sim < sim:
             max_sim = sim
@@ -220,15 +220,15 @@ def find_similar(states,state,count_threshold,similarity_threshold):
     return states[best] if not best is None else None
 
 
-def find_useful(transitions,utility_thereshold,count_threshold):
+def find_useful(transitions,transition_utility_thereshold,transition_count_threshold):
     max_utility = 0
     max_count = 0
     bests = []
     for s, utility_count in transitions.items():
         utility, count = utility_count
-        if utility < utility_thereshold: # disregard low utility
+        if utility < transition_utility_thereshold: # disregard low utility
             continue
-        if count < count_threshold: # disregard rare evidence
+        if count < transition_count_threshold: # disregard rare evidence
             continue
         if max_utility < utility:
             max_utility = utility
@@ -273,13 +273,13 @@ class BreakoutModelDriven(BreakoutProgrammable):
             match = 'exact'
         except KeyError:
             #found = find_similar(states,state,count_threshold=2,similarity_threshold=0.99)
-            found = find_similar(states,state,count_threshold=2,similarity_threshold=0.99999)
+            found = find_similar(states,state,state_count_threshold=2,state_similarity_threshold=0.99999)
             match = 'exact'
 
         if not found is None:
             (utility,count,transitions) = found
             #print('found',match,state,'=>',found,'=',len(transitions))
-            best = find_useful(transitions,utility_thereshold=1,count_threshold=2)
+            best = find_useful(transitions,transition_utility_thereshold=1,transition_count_threshold=1)
             if not best is None:
                 #print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
                 return best[0]
