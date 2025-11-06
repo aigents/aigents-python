@@ -76,10 +76,10 @@ lives = [4, 5, 5, 5, 5, 5]
 
 # TODO
 TODO - learn to play in [rball_X, rocket_X] space - implement ball_x/rocket_x strategy learning
-- pos only 10000 ...
-- if find more than one transition with the same U, select the random one from this
-- TransUtility=0=>1, TransCount=1=>2
-- T=1=>2
+- TEST: if find more than one transition with the same U, select the random one from this
+- TEST: TransUtility=0=>1, TransCount=1=>2
+- TODO: T=1=>2
+- TODO: Test Hyperparameters (in command line): TransUtility:[0,2], TransCount[0,2], Similarity:[0.9,0.99,0.999,0.9999,0.99999] T:[1,2]
 TODO - reporduce the "follow-the master" model by model-based player with generative randomness
 TODO - fix crashes on start HACK: act = 2
 TODO - avoid "cycling deadlocks" bugs

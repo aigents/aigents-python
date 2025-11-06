@@ -46,7 +46,7 @@ score = 0
 lives = None
 
 max_steps = 18000 # 18000 # according to Igor Pivoarov! (but games are truncated at 108000) 
-max_games = 10000 # 100
+max_games = 2500 # 100
 game = 0
 reward = 0
 action = None
