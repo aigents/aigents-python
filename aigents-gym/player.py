@@ -88,7 +88,7 @@ class BreakoutXXProgrammable(GymPlayer):
 
 class BreakoutProgrammable(GymPlayer):
 
-    def __init__(self,model=None,learn_mode=0,debug=False):
+    def __init__(self,model=None,learn_mode=0,context_size=1,debug=False):
         self.debug = debug
         self.memory_size = 30
         self.background_refresh_rate = 10
@@ -115,6 +115,7 @@ class BreakoutProgrammable(GymPlayer):
 
         self.model = model
         self.learn_mode = learn_mode
+        self.context_size = context_size
         self.states = []
 
     def process_observation(self,observation,reward,previous_action):
@@ -151,6 +152,17 @@ class BreakoutProgrammable(GymPlayer):
         ball_x = get_avg_pos(np.mean(ball_hor, axis=0),1)
         return (INT_NONE if racket_x is None else int(round(racket_x)), INT_NONE if ball_x is None else int(round(ball_x)))
 
+    def learn_model(self,state,reward):
+        if not self.model is None and self.learn_mode != 0:
+            if reward != 0:
+                if self.learn_mode == 1:
+                    feedback = reward if reward > 0 else 0 # positive only
+                else:
+                    feedback = reward # positive or negative
+                model_add_states(self.model,self.states,feedback)
+                self.states.clear() # clear the states including the rewarded one to start over with new state and new action on it
+            self.states.append(state)
+
 
     def process_state(self, observation, reward, previous_action):
         """
@@ -164,19 +176,16 @@ class BreakoutProgrammable(GymPlayer):
 
         # find racket & ball X
         (racket_col, ball_col) = self.racket_ball_x(observation)
-        state = (previous_action,)+(1 if reward > 0 else 0,1 if reward < 0 else 0)+(racket_col, ball_col)
+        current_state = (previous_action,)+(1 if reward > 0 else 0,1 if reward < 0 else 0)+(racket_col, ball_col)
+        #TODO aggregate states based on context_size
+        if self.context_size == 1:
+            state = current_state
+        else:
+            pass #TODO states
 
-        if not self.model is None and self.learn_mode != 0:
-            if reward != 0:
-                if self.learn_mode == 1:
-                    feedback = reward if reward > 0 else 0 # positive only
-                else:
-                    feedback = reward # positive or negative
-                model_add_states(self.model,self.states,feedback)
-                self.states.clear() # clear the states including the rewarded one to start over with new state and new action on it
-            self.states.append(state)
+        self.learn_model(state,reward)
 
-        if self.eval is None:
+        if self.eval is None: # Lazy init
             self.eval = BreakoutXXProgrammable(len(observation[self.racket_row]))
 
         #act = self.eval.process_state((racket_col, ball_col), reward)
@@ -246,8 +255,8 @@ def find_useful(transitions,transition_utility_thereshold,transition_count_thres
 
 class BreakoutModelDriven(BreakoutProgrammable):
 
-    def __init__(self,actions,model=None,learn_mode=0,debug=False):
-        super().__init__(model,learn_mode,debug)
+    def __init__(self,actions,model=None,learn_mode=0,context_size=1,debug=False):
+        super().__init__(model,learn_mode,context_size,debug)
         self.actions = actions
 
     def process_state(self, observation, reward, previous_action):
@@ -257,15 +266,7 @@ class BreakoutModelDriven(BreakoutProgrammable):
         (racket_col, ball_col) = self.racket_ball_x(observation)
         state = (previous_action,)+(1 if reward > 0 else 0,1 if reward < 0 else 0)+(racket_col, ball_col)
 
-        if not self.model is None and self.learn_mode != 0:
-            if reward != 0:
-                if self.learn_mode == 1:
-                    feedback = reward if reward > 0 else 0 # positive only
-                else:
-                    feedback = reward # positive or negative
-                model_add_states(self.model,self.states,feedback)
-                self.states.clear() # clear the states including the rewarded one to start over with new state and new action on it
-            self.states.append(state)
+        self.learn_model(state,reward)
 
         states = self.model['states']
         try:
@@ -279,7 +280,7 @@ class BreakoutModelDriven(BreakoutProgrammable):
         if not found is None:
             (utility,count,transitions) = found
             #print('found',match,state,'=>',found,'=',len(transitions))
-            best = find_useful(transitions,transition_utility_thereshold=1,transition_count_threshold=1)
+            best = find_useful(transitions,transition_utility_thereshold=0,transition_count_threshold=1)
             if not best is None:
                 #print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
                 return best[0]
