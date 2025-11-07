@@ -49,7 +49,7 @@ for _ in range(140000):
         observation, info = env.reset()
         scores.append(score)
         score = 0
-        print(scores)
+        print(f"terminated={terminated}, truncated={truncated}",scores)
         action = 1 # HACK: restarting the game !?
         continue # HACK: restarting the game !?
 

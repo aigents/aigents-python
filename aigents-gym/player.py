@@ -296,14 +296,14 @@ class BreakoutModelDriven(BreakoutProgrammable):
             found = states[state]
             match = 'exact'
         except KeyError:
-            #found = find_similar(states,state,count_threshold=2,similarity_threshold=0.99)
-            found = find_similar(states,state, state_count_threshold=2, state_similarity_threshold=0.99999)
+            found = find_similar(states,state, state_count_threshold=2, state_similarity_threshold=0.99)
             match = 'exact'
 
         if not found is None:
             (utility,count,transitions) = found
             #print('found',match,state,'=>',found,'=',len(transitions))
-            return find_useful_action(self.actions,transitions, transition_utility_thereshold=0, transition_count_threshold=1)
+            # new code TODO: fix and test!!!
+            #return find_useful_action(self.actions,transitions, transition_utility_thereshold=0, transition_count_threshold=1)
             # old code:
             best = find_useful(transitions,transition_utility_thereshold=0,transition_count_threshold=1)
             if not best is None:
