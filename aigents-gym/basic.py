@@ -1,6 +1,7 @@
 import os, sys
 import numpy as np
 import pickle
+import random
 
 INT_NONE = -sys.maxsize - 1
 
@@ -75,14 +76,80 @@ assert(str(model_add_states(model_new(),[(0,0),(0,1),(0,0),(0,1)],0))=="{'steps'
 assert(str(model_add_states(model_new(),[(0,0),(0,1),(0,0),(0,1)],1))=="{'steps': 4, 'games': 0, 'states': {(0, 0): (2, 2, {(0, 1): (2, 2)}), (0, 1): (2, 2, {(0, 0): (1, 1)})}, 'transitions': {}}")
 
 
+def find_similar(states,state,state_count_threshold,state_similarity_threshold):
+    max_sim = 0
+    bests = []
+    for s, utility_count in states.items():
+        if utility_count[1] < state_count_threshold: # disregard rare evidence
+            continue
+        sim = cosine_similarity(s,state)
+        if sim < state_similarity_threshold:
+            continue
+        if max_sim < sim:
+            max_sim = sim
+            bests.clear()
+            bests.append(s)
+        elif max_sim == sim:
+            bests.append(s)
+    best = bests[0] if len(bests) == 1 else random.choice(bests) if len(bests) > 1 else None
+    return states[best] if not best is None else None
+
+
+def find_useful(transitions,transition_utility_thereshold,transition_count_threshold):
+    max_utility = -1000000000
+    max_count = 0
+    bests = []
+    for s, utility_count in transitions.items():
+        utility, count = utility_count
+        if utility < transition_utility_thereshold: # disregard low utility
+            continue
+        if count < transition_count_threshold: # disregard rare evidence
+            continue
+        if max_utility < utility:
+            max_utility = utility
+            max_count = count
+            bests.clear()
+            bests.append(s)
+        elif max_utility == utility:
+            bests.append(s)
+    best = bests[0] if len(bests) == 1 else random.choice(bests) if len(bests) > 1 else None
+    if not best is None:
+        #print('found',max_utility,max_count,len(transitions),best[0] if not best is None else '-')
+        pass
+    return best
+
+
+def find_useful_action(actions,transitions,transition_utility_thereshold,transition_count_threshold):
+    actions_uc = {a:0 for a,k in enumerate(actions)} # TODO: optimize to arrray from map!?
+    for s, utility_count in transitions.items():
+        utility, count = utility_count
+        if utility < transition_utility_thereshold: # disregard low utility
+            continue
+        if count < transition_count_threshold: # disregard rare evidence
+            continue
+        actions_uc[s[0]] += utility * count
+    max_uc = -1000000000 # TODO configure
+    action = None
+    for a in actions_uc:
+        uc = actions_uc[a]
+        if max_uc < uc:
+            max_uc = uc
+            action = a
+    return action
+
 
 # TODO make abstract
 class GymPlayer:
-    def __init__(self):
-        pass
+    def __init__(self,debug):
+        self.debug = debug
 
     def process_state(self, observation, reward, previous_action):
         pass
+
+    def debugging(self):
+        if self.debug or os.path.exists('debug'):
+            return True
+        return False 
 
 
 

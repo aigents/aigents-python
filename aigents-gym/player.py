@@ -1,5 +1,4 @@
-import sys
-import random
+#import sys
 import numpy as np
 from queue import Queue, Full, Empty
 
@@ -7,7 +6,7 @@ from basic import *
 
 class BreakoutHacky(GymPlayer):
     def __init__(self,model=None,debug=False):
-        self.debug = debug
+        super().__init__(debug)
         self.model = model
         self.rocket_row = None
         self.diff_vert = None
@@ -72,7 +71,8 @@ class BreakoutHacky(GymPlayer):
 
 
 class BreakoutXXProgrammable(GymPlayer):
-    def __init__(self,width):
+    def __init__(self,width,debug=False):
+        super().__init__(debug)
         self.reactivity_base = 4
         self.randomness = 0
 
@@ -155,7 +155,7 @@ class BreakoutXXProgrammable(GymPlayer):
 class BreakoutProgrammable(GymPlayer):
 
     def __init__(self,model=None,learn_mode=0,context_size=1,debug=False):
-        self.debug = debug
+        super().__init__(debug)
         self.memory_size = 30
         self.background_refresh_rate = 10
         
@@ -276,49 +276,6 @@ class BreakoutProgrammable(GymPlayer):
         return act
 
 
-def find_similar(states,state,state_count_threshold,state_similarity_threshold):
-    max_sim = 0
-    bests = []
-    for s, utility_count in states.items():
-        if utility_count[1] < state_count_threshold: # disregard rare evidence
-            continue
-        sim = cosine_similarity(s,state)
-        if sim < state_similarity_threshold:
-            continue
-        if max_sim < sim:
-            max_sim = sim
-            bests.clear()
-            bests.append(s)
-        elif max_sim == sim:
-            bests.append(s)
-    best = bests[0] if len(bests) == 1 else random.choice(bests) if len(bests) > 1 else None
-    return states[best] if not best is None else None
-
-
-def find_useful(transitions,transition_utility_thereshold,transition_count_threshold):
-    max_utility = 0
-    max_count = 0
-    bests = []
-    for s, utility_count in transitions.items():
-        utility, count = utility_count
-        if utility < transition_utility_thereshold: # disregard low utility
-            continue
-        if count < transition_count_threshold: # disregard rare evidence
-            continue
-        if max_utility < utility:
-            max_utility = utility
-            max_count = count
-            bests.clear()
-            bests.append(s)
-        elif max_utility == utility:
-            bests.append(s)
-    best = bests[0] if len(bests) == 1 else random.choice(bests) if len(bests) > 1 else None
-    if not best is None:
-        #print('found',max_utility,max_count,len(transitions),best[0] if not best is None else '-')
-        pass
-    return best
-
-
 class BreakoutModelDriven(BreakoutProgrammable):
 
     def __init__(self,actions,model=None,learn_mode=0,context_size=1,debug=False):
@@ -340,16 +297,20 @@ class BreakoutModelDriven(BreakoutProgrammable):
             match = 'exact'
         except KeyError:
             #found = find_similar(states,state,count_threshold=2,similarity_threshold=0.99)
-            found = find_similar(states,state,state_count_threshold=2,state_similarity_threshold=0.99999)
+            found = find_similar(states,state,state_count_threshold=2,state_similarity_threshold=0.9)
             match = 'exact'
 
         if not found is None:
             (utility,count,transitions) = found
             #print('found',match,state,'=>',found,'=',len(transitions))
+            return find_useful_action(self.actions,transitions,transition_utility_thereshold=0,transition_count_threshold=1)
+            # old code:
             best = find_useful(transitions,transition_utility_thereshold=0,transition_count_threshold=1)
             if not best is None:
-                #print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
+                if self.debugging():
+                    print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
                 return best[0]
+            
 
         #print("found none")
         return random.choice(self.actions)

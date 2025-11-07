@@ -38,11 +38,11 @@ if hasattr(env, 'get_action_meanings'):
 
 #model = None
 #model = model_new()
-#model=model_read_file("./test")
-model=model_read_file("./models/breakout/episodic")
-#eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
-eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=2,debug=False)
+model=model_read_file("./models/breakout/episodic_G100_T1")
+
 #eval = BreakoutHacky() 
+#eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
+eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=0,debug=False)
 
 scores = []
 stepss = []
@@ -55,7 +55,7 @@ score = 0
 lives = None
 
 max_steps = 18000 # 18000 # according to Igor Pivoarov! (but games are truncated at 108000) 
-max_games = 2500 # 100
+max_games = 100 # 2500 # 100
 game = 0
 reward = 0
 #action = # env.action_space.sample()
