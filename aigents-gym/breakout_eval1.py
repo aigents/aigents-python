@@ -8,10 +8,11 @@ from basic import *
 from player import *
 
 parser = argparse.ArgumentParser(description='Open AI Gym Evaluator')
-parser.add_argument('--render_mode', type=str, default=None, help='Render mode')
+parser.add_argument('-r','--render', type=str, default=None, help='Render mode')
+parser.add_argument('-m','--model', type=str, default=None, help='State model')
 
 args = parser.parse_args()
-print(args.render_mode)
+print(args.render, args.model)
 
 
 # Initialise the environment
@@ -21,7 +22,7 @@ print(args.render_mode)
 #env = gym.make('Breakout-v4', render_mode='human') # works
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human') # works
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
-env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale", render_mode=args.render_mode)
+env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale", render_mode=args.render)
 
 # For discrete action spaces (like Atari games)
 if hasattr(env.action_space, 'n'):
@@ -38,11 +39,12 @@ if hasattr(env, 'get_action_meanings'):
 
 #model = None
 #model = model_new()
-model=model_read_file("./models/breakout/episodic_G100_T1")
+model=model_read_file(args.model)
 
 #eval = BreakoutHacky() 
 #eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
-eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=0,debug=False)
+#eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=0,debug=False)
+eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)),model=model)
 
 scores = []
 stepss = []
@@ -117,7 +119,7 @@ while (game < max_games):
             print('lapses =', lapses)
             if not model is None:
                 print('states =', states)
-                model_write_file(f'episodic',model)
+                model_write_file(f'model',model)
         game += 1
         action = 1 # HACK: restarting the game !?
         continue # HACK: restarting the game !?

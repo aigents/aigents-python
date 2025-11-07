@@ -297,20 +297,102 @@ class BreakoutModelDriven(BreakoutProgrammable):
             match = 'exact'
         except KeyError:
             #found = find_similar(states,state,count_threshold=2,similarity_threshold=0.99)
-            found = find_similar(states,state,state_count_threshold=2,state_similarity_threshold=0.9)
+            found = find_similar(states,state, state_count_threshold=2, state_similarity_threshold=0.99999)
             match = 'exact'
 
         if not found is None:
             (utility,count,transitions) = found
             #print('found',match,state,'=>',found,'=',len(transitions))
-            return find_useful_action(self.actions,transitions,transition_utility_thereshold=0,transition_count_threshold=1)
+            return find_useful_action(self.actions,transitions, transition_utility_thereshold=0, transition_count_threshold=1)
             # old code:
             best = find_useful(transitions,transition_utility_thereshold=0,transition_count_threshold=1)
             if not best is None:
                 if self.debugging():
                     print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
                 return best[0]
-            
+    
+        #print("found none")
+        return random.choice(self.actions)
+
+
+## Old code from Nov 3 2025 TODO remove later
+
+def find_similar1(states,state,count_threshold,similarity_threshold):
+    max_sim = 0
+    best = None
+    for s, utility_count in states.items():
+        #print(s,state)
+        if utility_count[1] < count_threshold: # disregard rare evidence
+            continue
+        sim = cosine_similarity(s,state)
+        if sim < similarity_threshold:
+            continue
+        if max_sim < sim:
+            max_sim = sim
+            best = s
+    #if not best is None:
+    #    print('similarity',max_sim)
+    return states[best] if not best is None else None
+
+
+def find_useful1(transitions,utility_thereshold,count_threshold):
+    max_utility = 0
+    max_count = 0
+    best = None
+    for s, utility_count in transitions.items():
+        utility, count = utility_count
+        if utility < utility_thereshold: # disregard low utility
+            continue
+        if count < count_threshold: # disregard rare evidence
+            continue
+        if max_utility < utility:
+            max_utility = utility
+            max_count = count
+            best = s
+    if not best is None:
+        #print('found',max_utility,max_count,len(transitions),best[0] if not best is None else '-')
+        return best
+
+
+# TODO remove later
+class BreakoutModelDrivenNov32025(BreakoutProgrammable):
+
+    def __init__(self,actions,model=None,learn_mode=0,debug=False):
+        super().__init__(model,debug)
+        self.actions = actions
+        self.learn_mode = learn_mode
+
+    def process_state(self, observation, reward, previous_action):
+        observation = self.process_observation(observation,reward,previous_action)
+
+        # find racket & ball X
+        (racket_col, ball_col) = self.racket_ball_x(observation)
+        state = (previous_action,)+(1 if reward > 0 else 0,1 if reward < 0 else 0)+(racket_col, ball_col)
+
+        if not self.model is None and self.learn_mode != 0:
+            if reward != 0:
+                if self.learn_mode == 1:
+                    feedback = reward if reward > 0 else 0 # positive only
+                else:
+                    feedback = reward # positive or negative
+                model_add_states(self.model,self.states,feedback)
+            self.states.append(state)
+
+        states = self.model['states']
+        try:
+            found = states[state]
+            match = 'exact'
+        except KeyError:
+            found = find_similar1(states,state,2,0.99) # HACK: threshold!?
+            match = 'exact'
+
+        if not found is None:
+            (utility,count,transitions) = found
+            #print('found',match,state,'=>',found,'=',len(transitions))
+            best = find_useful1(transitions,0,1)
+            if not best is None:
+                #print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
+                return best[0]
 
         #print("found none")
         return random.choice(self.actions)
