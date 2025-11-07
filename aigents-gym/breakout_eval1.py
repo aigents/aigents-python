@@ -2,9 +2,17 @@ import ale_py
 import gymnasium as gym
 import numpy as np
 import datetime as dt
+import argparse
 
 from basic import *
 from player import *
+
+parser = argparse.ArgumentParser(description='Open AI Gym Evaluator')
+parser.add_argument('--render_mode', type=str, default=None, help='Render mode')
+
+args = parser.parse_args()
+print(args.render_mode)
+
 
 # Initialise the environment
 #env = gym.make("LunarLander-v3", render_mode="human") # works
@@ -13,7 +21,7 @@ from player import *
 #env = gym.make('Breakout-v4', render_mode='human') # works
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human') # works
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
-env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale")
+env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale", render_mode=args.render_mode)
 
 # For discrete action spaces (like Atari games)
 if hasattr(env.action_space, 'n'):
@@ -29,11 +37,12 @@ if hasattr(env, 'get_action_meanings'):
         print(f"Action {i}: {meaning}")
 
 #model = None
-model = model_new()
+#model = model_new()
 #model=model_read_file("./test")
-#model=model_read_file("./models/breakout/episodic")
+model=model_read_file("./models/breakout/episodic")
 #eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
-eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=1,debug=False) 
+eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=2,debug=False)
+#eval = BreakoutHacky() 
 
 scores = []
 stepss = []
@@ -49,7 +58,8 @@ max_steps = 18000 # 18000 # according to Igor Pivoarov! (but games are truncated
 max_games = 2500 # 100
 game = 0
 reward = 0
-action = None
+#action = # env.action_space.sample()
+action = 0 # HACK: setting the game!?
 
 # Reset the environment to generate the first observation
 #observation, info = env.reset(seed=42)
@@ -58,10 +68,10 @@ grand_t0 = t0
 observation, info = env.reset()
 while (game < max_games):
     # this is where you would insert your policy
-    if action is None:
-        action = 2 # env.action_space.sample() # TODO why setting to 0 or 1 crashes on start?
-    else:
-        action = eval.process_state(observation, reward, action) # pass previous observation, reward (may be negative) and past action (remembered) in 
+    # if action is None:
+    #    action = 2 # env.action_space.sample() # TODO why setting to 0 or 1 crashes on start?
+    #else:
+    #    action = eval.process_state(observation, reward, action) # pass previous observation, reward (may be negative) and past action (remembered) in 
 
     # step (transition) through the environment with the action
     # receiving the next observation, reward and if the episode has terminated or truncated
@@ -80,7 +90,8 @@ while (game < max_games):
         pass
 
     # If the episode has ended then we can reset to start a new episode
-    if terminated or truncated or steps == max_steps:
+    #if terminated or truncated or steps == max_steps:
+    if terminated or truncated: # need to reach max 860 (reached) or 864 (not reached)
         t1 = dt.datetime.now()
         lapse = t1 - t0
         t0 = t1
@@ -96,7 +107,6 @@ while (game < max_games):
         score = 0
         steps = 0 
         lives = None
-        # TODO action = 1 !?
         if game == (max_games - 1):
             grand_t1 = t1
             total_time = grand_t1 - grand_t0
@@ -109,5 +119,9 @@ while (game < max_games):
                 print('states =', states)
                 model_write_file(f'episodic',model)
         game += 1
+        action = 1 # HACK: restarting the game !?
+        continue # HACK: restarting the game !?
+
+    action = eval.process_state(observation, reward, action) # pass previous observation, reward (may be negative) and past action (remembered) in 
 
 env.close()
