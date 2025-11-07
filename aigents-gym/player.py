@@ -317,7 +317,7 @@ class BreakoutModelDriven(BreakoutProgrammable):
 
 ## Old code from Nov 3 2025 TODO remove later
 
-def find_similar1(states,state,count_threshold,similarity_threshold):
+def find_similarNov32025(states,state,count_threshold,similarity_threshold):
     max_sim = 0
     best = None
     for s, utility_count in states.items():
@@ -335,7 +335,7 @@ def find_similar1(states,state,count_threshold,similarity_threshold):
     return states[best] if not best is None else None
 
 
-def find_useful1(transitions,utility_thereshold,count_threshold):
+def find_usefulNov32025(transitions,utility_thereshold,count_threshold):
     max_utility = 0
     max_count = 0
     best = None
@@ -376,6 +376,7 @@ class BreakoutModelDrivenNov32025(BreakoutProgrammable):
                 else:
                     feedback = reward # positive or negative
                 model_add_states(self.model,self.states,feedback)
+                self.states.clear() # clear the states including the rewarded one to start over with new state and new action on it
             self.states.append(state)
 
         states = self.model['states']
@@ -383,13 +384,13 @@ class BreakoutModelDrivenNov32025(BreakoutProgrammable):
             found = states[state]
             match = 'exact'
         except KeyError:
-            found = find_similar1(states,state,2,0.99) # HACK: threshold!?
+            found = find_similarNov32025(states,state,2,0.99) # HACK: threshold!?
             match = 'exact'
 
         if not found is None:
             (utility,count,transitions) = found
             #print('found',match,state,'=>',found,'=',len(transitions))
-            best = find_useful1(transitions,0,1)
+            best = find_usefulNov32025(transitions,0,1)
             if not best is None:
                 #print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
                 return best[0]
