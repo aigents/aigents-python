@@ -5,6 +5,72 @@ from queue import Queue, Full, Empty
 
 from basic import *
 
+class BreakoutHacky(GymPlayer):
+    def __init__(self,model=None,debug=False):
+        self.debug = debug
+        self.model = model
+        self.rocket_row = None
+        self.diff_vert = None
+        self.initial_array = None 
+        self.prev_rocket_size = 0
+
+    def process_state(self, raw_observation, reward, previous_action):
+
+        observation = np.ndarray((178,144))
+        for i in range(32, len(raw_observation)):
+            observation[i-32] = raw_observation[i][8:152]
+
+        if self.initial_array is None:
+            self.initial_array = np.copy(observation)
+            return 1 # fire ball 
+        
+        if self.rocket_row is None:
+            max = 0
+            self.diff_vert = [int(np.sum(d)) for d in observation] 
+            for row in range(100, len(self.diff_vert)): # ignore rows with tiles
+                if self.diff_vert[row] > max:
+                    max = self.diff_vert[row]
+                    self.rocket_row = row
+            if self.debug:
+                print(self.rocket_row) # = 157
+
+        diff = np.maximum(np.subtract(observation,self.initial_array),0)
+        diff_ball = diff[0:self.rocket_row]
+
+        # ball size 2, rocket size starts with 16 and gets smaller
+        ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same')) + (2)/2
+        rocket_size = int(np.sum([1 for d in observation[self.rocket_row] if d>0]))
+        rocket_col = np.argmax(np.convolve(observation[self.rocket_row], [1,1,1], mode='same')) - 1
+        if rocket_col + rocket_size <= 143: # no right wall collision
+            self.prev_rocket_size = rocket_size
+        rocket_col += (self.prev_rocket_size)/2
+
+        # check if ball is in game
+        if int(np.sum([int(np.sum(d)) for d in diff_ball])) == 0:
+            # return rocket to the center of the screen
+            if rocket_col < 72:
+                return 2 # RIGHT
+            elif rocket_col > 72:
+                return 3 # LEFT
+            else:
+                #prev_action = 1
+                return 1 # fire new ball
+
+        if rocket_col < ball_col - 4:
+            if rocket_col + (self.prev_rocket_size)/2 > 143:
+                act = 0 # NOOP - right wall collision
+            else:    
+                act = 2 # RIGHT
+        elif rocket_col > ball_col + 4:
+            act = 3 # RIGHT
+        else:
+            act = 0 # NOOP
+
+        return act
+
+
+
+
 class BreakoutXXProgrammable(GymPlayer):
     def __init__(self,width):
         self.reactivity_base = 4
