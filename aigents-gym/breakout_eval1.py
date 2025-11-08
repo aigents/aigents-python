@@ -43,8 +43,8 @@ model=model_read_file(args.model)
 
 #eval = BreakoutHacky() 
 #eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
-eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=2,debug=False)
-#eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)),model=model,learn_mode=0)
+#eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=2,debug=False)
+eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)),model=model,learn_mode=2)
 
 scores = []
 stepss = []
