@@ -303,7 +303,7 @@ class BreakoutModelDriven(BreakoutProgrammable):
             (utility,count,transitions) = found
             #print('found',match,state,'=>',found,'=',len(transitions))
             # new code TODO: fix and test!!!
-            #return find_useful_action(self.actions,transitions, transition_utility_thereshold=0, transition_count_threshold=1)
+            return find_useful_action(self.actions,transitions, transition_utility_thereshold=0, transition_count_threshold=1)
             # old code:
             best = find_useful(transitions,transition_utility_thereshold=0,transition_count_threshold=1)
             if not best is None:

@@ -8,7 +8,7 @@ from basic import *
 from player import *
 
 parser = argparse.ArgumentParser(description='Open AI Gym Evaluator')
-parser.add_argument('-r','--render', type=str, default=None, help='Render mode')
+parser.add_argument('-r','--render', type=str, default=None, help='Render mode') # human
 parser.add_argument('-m','--model', type=str, default=None, help='State model')
 
 args = parser.parse_args()
@@ -39,12 +39,13 @@ if hasattr(env, 'get_action_meanings'):
 
 #model = None
 #model = model_new()
-model=model_read_file(args.model)
+#model=model_read_file(args.model)
+model = model_new() if args.model is None else model_read_file(args.model)
 
 #eval = BreakoutHacky() 
 #eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
-#eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=2,debug=False)
-eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)),model=model,learn_mode=2)
+eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=2,debug=False)
+#eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=1)
 
 scores = []
 stepss = []
@@ -57,7 +58,7 @@ score = 0
 lives = None
 
 max_steps = 18000 # 18000 # according to Igor Pivoarov! (but games are truncated at 108000) 
-max_games = 100 # 2500 # 100
+max_games = 1000 # 2500 # 100
 game = 0
 reward = 0
 #action = # env.action_space.sample()
@@ -99,7 +100,7 @@ while (game < max_games):
         t0 = t1
         observation, info = env.reset()
         print(f"game={game} cause=\"{'terminated' if terminated else 'truncated' if truncated else f'{max_steps}_limit'}\"; " +
-              f"score={score}; steps={steps}; lives={lives}; lapse=\"{str(lapse)}\"")
+              f"score={score}; steps={steps}; lives={lives}; lapse=\"{str(lapse)}\"; states={0 if model is None else len(model['states'])}")
         scores.append(score)
         stepss.append(steps)
         livess.append(lives)
