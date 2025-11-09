@@ -9,11 +9,10 @@ from player import *
 
 parser = argparse.ArgumentParser(description='Open AI Gym Evaluator')
 parser.add_argument('-r','--render', type=str, default=None, help='Render mode') # human
-parser.add_argument('-m','--model', type=str, default=None, help='State model')
+parser.add_argument('-i','--input', type=str, default=None, help='Input model')
+parser.add_argument('-o','--output', type=str, default="model", help='Output model')
 
 args = parser.parse_args()
-print(args.render, args.model)
-
 
 # Initialise the environment
 #env = gym.make("LunarLander-v3", render_mode="human") # works
@@ -40,13 +39,13 @@ if hasattr(env, 'get_action_meanings'):
 #model = None
 #model = model_new()
 #model=model_read_file(args.model)
-model = model_new() if args.model is None else model_read_file(args.model)
-print(args.model,len(model['states']),model['games'])
+model = model_new() if args.input is None else model_read_file(args.input)
+print(f"model={args.input}; states={len(model['states'])}; games={model['games']}")
 
 #eval = BreakoutHacky() 
 #eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
-eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=1,debug=False)
-#eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=2)
+#eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=1,debug=False)
+eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=2)
 
 scores = []
 stepss = []
@@ -123,7 +122,7 @@ while (game < max_games):
             if not model is None:
                 print('states =', states)
                 model['games'] = +game
-                model_write_file(f'model',model)
+                model_write_file(args.output,model)
         action = 1 # HACK: restarting the game !?
         continue # HACK: restarting the game !?
 

@@ -123,13 +123,13 @@ def find_useful_action(actions,transitions,transition_utility_thereshold,transit
     actions_uc = {a:0 for a,k in enumerate(actions)} # TODO: optimize to arrray from map!?
     for s, utility_count in transitions.items():
         utility, count = utility_count
-        if not transition_utility_thereshold is None and utility < transition_utility_thereshold: # disregard low utility
+        if (not transition_utility_thereshold is None) and utility < transition_utility_thereshold: # disregard low utility
             continue
         if count < transition_count_threshold: # disregard rare evidence
             continue
         actions_uc[s[0]] += utility * count
         #actions_uc[s[0]] += utility
-    max_uc = None # TODO configure
+    max_uc = None
     acts = []
     for a in actions_uc:
         uc = actions_uc[a]

@@ -335,18 +335,35 @@ def find_similarNov32025(states,state,count_threshold,similarity_threshold):
     #    print('similarity',max_sim)
     return states[best] if not best is None else None
 
+def find_similarNov32025_with_rand(states,state,count_threshold,similarity_threshold):
+    max_sim = 0
+    bests = []
+    for s, utility_count in states.items():
+        if utility_count[1] < count_threshold: # disregard rare evidence
+            continue
+        sim = cosine_similarity(s,state)
+        if sim < similarity_threshold:
+            continue
+        if max_sim < sim:
+            bests.clear()
+            max_sim = sim
+            bests.append(s)
+        elif max_sim == sim:
+            bests.append(s)
+    best = bests[0] if len(bests) == 1 else random.choice(bests) if len(bests) > 1 else None
+    return states[best] if not best is None else None
 
 def find_usefulNov32025(transitions,utility_thereshold,count_threshold):
-    max_utility = 0
+    max_utility = None
     max_count = 0
     best = None
     for s, utility_count in transitions.items():
         utility, count = utility_count
-        if utility < utility_thereshold: # disregard low utility
+        if (not utility_thereshold is None) and utility < utility_thereshold: # disregard low utility
             continue
         if count < count_threshold: # disregard rare evidence
             continue
-        if max_utility < utility:
+        if max_utility is None or max_utility < utility:
             max_utility = utility
             max_count = count
             best = s
@@ -355,7 +372,7 @@ def find_usefulNov32025(transitions,utility_thereshold,count_threshold):
         return best
 
 
-# TODO remove later
+# TODO remove or merge later
 class BreakoutModelDrivenNov32025(BreakoutProgrammable):
 
     def __init__(self,actions,model=None,learn_mode=0,debug=False):
@@ -385,7 +402,7 @@ class BreakoutModelDrivenNov32025(BreakoutProgrammable):
             found = states[state]
             match = 'exact'
         except KeyError:
-            found = find_similarNov32025(states,state,2,0.99) # HACK: threshold!?
+            found = find_similarNov32025_with_rand(states,state,2,0.99) # HACK: threshold!?
             match = 'exact'
 
         if not found is None:
