@@ -281,6 +281,7 @@ class BreakoutModelDriven(BreakoutProgrammable):
     def __init__(self,actions,model=None,learn_mode=0,context_size=1,debug=False):
         super().__init__(model,learn_mode,context_size,debug)
         self.actions = actions
+        self.prev_state = None #TODO deque or trash!?
 
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)

@@ -41,11 +41,12 @@ if hasattr(env, 'get_action_meanings'):
 #model = model_new()
 #model=model_read_file(args.model)
 model = model_new() if args.model is None else model_read_file(args.model)
+print(args.model,len(model['states']),model['games'])
 
 #eval = BreakoutHacky() 
 #eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
-eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=2,debug=False)
-#eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=1)
+eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=1,debug=False)
+#eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=2)
 
 scores = []
 stepss = []
@@ -110,7 +111,8 @@ while (game < max_games):
         score = 0
         steps = 0 
         lives = None
-        if game == (max_games - 1):
+        game += 1
+        if game == (max_games):
             grand_t1 = t1
             total_time = grand_t1 - grand_t0
             print(f"score_avg={round(np.mean(scores),1)}; steps_avg={round(np.mean(stepss),1)}; lives_avg={round(np.mean(livess),1)}; lapse_avg=\"{str(lapse)}\"; time=\"{str(total_time)}\"")
@@ -120,8 +122,8 @@ while (game < max_games):
             print('lapses =', lapses)
             if not model is None:
                 print('states =', states)
+                model['games'] = +game
                 model_write_file(f'model',model)
-        game += 1
         action = 1 # HACK: restarting the game !?
         continue # HACK: restarting the game !?
 

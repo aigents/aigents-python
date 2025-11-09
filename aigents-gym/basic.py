@@ -119,23 +119,30 @@ def find_useful(transitions,transition_utility_thereshold,transition_count_thres
     return best
 
 
-def find_useful_action(actions,transitions,transition_utility_thereshold,transition_count_threshold):
+def find_useful_action(actions,transitions,transition_utility_thereshold,transition_count_threshold,debug = False):
     actions_uc = {a:0 for a,k in enumerate(actions)} # TODO: optimize to arrray from map!?
     for s, utility_count in transitions.items():
         utility, count = utility_count
-        if utility < transition_utility_thereshold: # disregard low utility
+        if not transition_utility_thereshold is None and utility < transition_utility_thereshold: # disregard low utility
             continue
         if count < transition_count_threshold: # disregard rare evidence
             continue
         actions_uc[s[0]] += utility * count
-    max_uc = -1000000000 # TODO configure
-    action = None
+        #actions_uc[s[0]] += utility
+    max_uc = None # TODO configure
+    acts = []
     for a in actions_uc:
         uc = actions_uc[a]
-        if max_uc < uc:
+        if max_uc is None or max_uc < uc:
             max_uc = uc
-            action = a
-    return action
+            acts.clear()
+            acts.append(a)
+        elif max_uc == uc:
+            acts.append(a)
+    act = acts[0] if len(acts) == 1 else random.choice(actions)
+    if False:#debug:
+        print(str(actions_uc),str({a:round(actions_uc[a]) for a,k in enumerate(actions)}),act)
+    return act
 
 
 # TODO make abstract
@@ -147,7 +154,7 @@ class GymPlayer:
         pass
 
     def debugging(self):
-        if self.debug or os.path.exists('debug'):
+        if self.debug: #or os.path.exists('debug'): # avoid OS hitting HDD!?
             return True
         return False 
 
