@@ -44,8 +44,8 @@ print(f"model={args.input}; states={len(model['states'])}; games={model['games']
 
 #eval = BreakoutHacky() 
 #eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
-#eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=1,debug=False)
-eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=2)
+eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=2,debug=False)
+#eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=1)
 
 scores = []
 stepss = []

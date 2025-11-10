@@ -21,14 +21,23 @@ def get_avg_pos(a,t):
 def cosine_similarity(a,b):
     return np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b))
 
-def model_new():
+def model_set_context_size(model,context_size=1):
+    if context_size > 1:
+        model['contexts'] = {}
+        for size in range(2,context_size+1):
+            model['contexts'][size] = {}
+    return model
+
+def model_new(context_size=1):
     """
     games: games count
     steps: steps count
     states: map states to (utility,count,transtions) triple
         transitions: map states pair to (utility,count)
     """
-    return {'steps':0, 'games':0, 'states':{}, 'transitions':{}}
+    model = {'steps':0, 'games':0, 'states':{}}
+    model_set_context_size(model,context_size=context_size)
+    return model
 
 def model_read_file(model_name):
     model_path = model_name + '.pkl'
@@ -51,7 +60,6 @@ def model_add_states(model,states,global_feeddback):
     """
     model['steps'] += len(states)
     model_states = model['states']
-    model_transitions = model['transitions']
     previous = None
     for state in states:
         if state in model_states:
@@ -70,10 +78,68 @@ def model_add_states(model,states,global_feeddback):
         previous = state
     return model
 
-assert(str(model_add_states(model_new(),[],0))=="{'steps': 0, 'games': 0, 'states': {}, 'transitions': {}}")
-assert(str(model_add_states(model_new(),[(0,0),(0,1)],0))=="{'steps': 2, 'games': 0, 'states': {(0, 0): (0, 1, {(0, 1): (0, 1)}), (0, 1): (0, 1, {})}, 'transitions': {}}")
-assert(str(model_add_states(model_new(),[(0,0),(0,1),(0,0),(0,1)],0))=="{'steps': 4, 'games': 0, 'states': {(0, 0): (0, 2, {(0, 1): (0, 2)}), (0, 1): (0, 2, {(0, 0): (0, 1)})}, 'transitions': {}}")
-assert(str(model_add_states(model_new(),[(0,0),(0,1),(0,0),(0,1)],1))=="{'steps': 4, 'games': 0, 'states': {(0, 0): (2, 2, {(0, 1): (2, 2)}), (0, 1): (2, 2, {(0, 0): (1, 1)})}, 'transitions': {}}")
+assert(str(model_add_states(model_new(),[],0))=="{'steps': 0, 'games': 0, 'states': {}}")
+assert(str(model_add_states(model_new(),[(0,0),(0,1)],0))=="{'steps': 2, 'games': 0, 'states': {(0, 0): (0, 1, {(0, 1): (0, 1)}), (0, 1): (0, 1, {})}}")
+assert(str(model_add_states(model_new(),[(0,0),(0,1),(0,0),(0,1)],0))=="{'steps': 4, 'games': 0, 'states': {(0, 0): (0, 2, {(0, 1): (0, 2)}), (0, 1): (0, 2, {(0, 0): (0, 1)})}}")
+assert(str(model_add_states(model_new(),[(0,0),(0,1),(0,0),(0,1)],1))=="{'steps': 4, 'games': 0, 'states': {(0, 0): (2, 2, {(0, 1): (2, 2)}), (0, 1): (2, 2, {(0, 0): (1, 1)})}}")
+
+def model_add_state_transitions(model_states,previous,state,global_feeddback):
+    if state in model_states:
+        (utility, count, transitions) = model_states[state]
+        model_states[state] = (utility + global_feeddback, count + 1, transitions)
+    else:
+        model_states[state] = (global_feeddback, 1, {})
+    if not previous is None:
+        (utility, count, transitions) = model_states[previous]
+        if state in transitions:
+            (transition_utility, transition_count) = transitions[state]
+            transitions[state] = (transition_utility + global_feeddback, transition_count + 1)
+        else:
+            transitions[state] = (global_feeddback, 1)
+        model_states[previous] = (utility, count, transitions)
+
+def model_add_context_transitions(model_contexts,context,state,global_feeddback):
+    if context in model_contexts:
+        (utility, count, transitions) = model_contexts[context]
+        utility += global_feeddback
+        count += 1
+    else:
+        (utility, count, transitions) = (global_feeddback, 1, {})
+    if state in transitions:
+        (transition_utility, transition_count) = transitions[state]
+        transitions[state] = (transition_utility + global_feeddback, transition_count + 1)
+    else:
+        transitions[state] = (global_feeddback, 1)
+    model_contexts[context] = (utility, count, transitions)
+
+def model_add_states_contexts(model,states,global_feeddback):
+    """
+    Add emotionally valuable episode of N of states with some global feeddback
+    """
+    model['steps'] += len(states)
+    model_states = model['states']
+    model_contexts = model['contexts'] if 'contexts' in model else None
+    model_contexts_count = len(model_contexts) if not model_contexts is None else 0
+    previous = None
+    for index, state in enumerate(states):
+        model_add_state_transitions(model_states,previous,state,global_feeddback)
+        previous = state
+        for context_index in range(model_contexts_count): # from 2 and up, [0,1,2,...]=>[2,3,4,...]
+            context_size = context_index + 2
+            if index + 1 > context_size: #TODO simplify
+                model_context = model_contexts[context_size]
+                context = sum(states[index-context_size:index],())
+                model_add_context_transitions(model_context,context,state,global_feeddback)
+    return model
+
+assert(str(model_add_states_contexts(model_new(),[],0))=="{'steps': 0, 'games': 0, 'states': {}}")
+assert(str(model_add_states_contexts(model_new(),[(0,0),(0,1)],0))=="{'steps': 2, 'games': 0, 'states': {(0, 0): (0, 1, {(0, 1): (0, 1)}), (0, 1): (0, 1, {})}}")
+assert(str(model_add_states_contexts(model_new(),[(0,0),(0,1),(0,0),(0,1)],0))=="{'steps': 4, 'games': 0, 'states': {(0, 0): (0, 2, {(0, 1): (0, 2)}), (0, 1): (0, 2, {(0, 0): (0, 1)})}}")
+assert(str(model_add_states_contexts(model_new(),[(0,0),(0,1),(0,0),(0,1)],1))=="{'steps': 4, 'games': 0, 'states': {(0, 0): (2, 2, {(0, 1): (2, 2)}), (0, 1): (2, 2, {(0, 0): (1, 1)})}}")
+assert(str(model_new(context_size=2))=="{'steps': 0, 'games': 0, 'states': {}, 'contexts': {2: {}}}")
+assert(str(model_add_states_contexts(model_new(context_size=2),[(1,1),(2,2),(3,3)],0))=="{'steps': 3, 'games': 0, 'states': {(1, 1): (0, 1, {(2, 2): (0, 1)}), (2, 2): (0, 1, {(3, 3): (0, 1)}), (3, 3): (0, 1, {})}, 'contexts': {2: {(1, 1, 2, 2): (0, 1, {(3, 3): (0, 1)})}}}")
+assert(str(model_add_states_contexts(model_new(context_size=2),[(1,1),(2,2),(3,3),(4,4)],1)['contexts'])=="{2: {(1, 1, 2, 2): (1, 1, {(3, 3): (1, 1)}), (2, 2, 3, 3): (1, 1, {(4, 4): (1, 1)})}}")
+assert(str(model_add_states_contexts(model_new(context_size=2),[(1,1),(2,2),(1,1),(2,2),(3,3)],1)['contexts'])=="{2: {(1, 1, 2, 2): (2, 2, {(1, 1): (1, 1), (3, 3): (1, 1)}), (2, 2, 1, 1): (1, 1, {(2, 2): (1, 1)})}}")
 
 
 def find_similar(states,state,state_count_threshold,state_similarity_threshold):
@@ -158,5 +224,5 @@ class GymPlayer:
             return True
         return False 
 
-
-
+if __name__ == "__main__":
+    print("Ok")

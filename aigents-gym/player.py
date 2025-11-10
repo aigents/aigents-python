@@ -1,6 +1,7 @@
 #import sys
 import numpy as np
 from queue import Queue, Full, Empty
+from collections import deque
 
 from basic import *
 
@@ -182,7 +183,8 @@ class BreakoutProgrammable(GymPlayer):
         self.model = model
         self.learn_mode = learn_mode
         self.context_size = context_size
-        self.states = []
+        self.context_states = deque(maxlen=context_size) # all very latest states
+        self.states = [] # all states in emotionally reinforced context
 
     def process_observation(self,observation,reward,previous_action):
         if self.observation_top > 0: 
@@ -281,7 +283,6 @@ class BreakoutModelDriven(BreakoutProgrammable):
     def __init__(self,actions,model=None,learn_mode=0,context_size=1,debug=False):
         super().__init__(model,learn_mode,context_size,debug)
         self.actions = actions
-        self.prev_state = None #TODO deque or trash!?
 
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)
@@ -304,7 +305,7 @@ class BreakoutModelDriven(BreakoutProgrammable):
             (utility,count,transitions) = found
             #print('found',match,state,'=>',found,'=',len(transitions))
             # new code TODO: fix and test!!!
-            return find_useful_action(self.actions,transitions, transition_utility_thereshold=0, transition_count_threshold=1)
+            return find_useful_action(self.actions,transitions, transition_utility_thereshold=None, transition_count_threshold=1)
             # old code:
             best = find_useful(transitions,transition_utility_thereshold=0,transition_count_threshold=1)
             if not best is None:
@@ -408,7 +409,7 @@ class BreakoutModelDrivenNov32025(BreakoutProgrammable):
         if not found is None:
             (utility,count,transitions) = found
             #print('found',match,state,'=>',found,'=',len(transitions))
-            best = find_usefulNov32025(transitions,0,1)
+            best = find_usefulNov32025(transitions,None,1)
             if not best is None:
                 #print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
                 return best[0]
