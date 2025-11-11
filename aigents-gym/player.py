@@ -411,7 +411,7 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
                 match = 'exact2'
             except KeyError:
                 found = find_similarNov32025_with_rand(contexts,context, self.state_count_threshold, self.state_similarity_threshold )
-                match = 'exact2'
+                match = 'similar2'
         if found is None:
             states = self.model['states']
             try:
@@ -419,7 +419,7 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
                 match = 'exact1'
             except KeyError:
                 found = find_similarNov32025_with_rand(states,state, self.state_count_threshold, self.state_similarity_threshold)
-                match = 'exact1'
+                match = 'similar1'
 
         if not found is None:
             (utility,count,transitions) = found
