@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser(description='Open AI Gym Evaluator')
 parser.add_argument('-r','--render', type=str, default=None, help='Render mode') # human
 parser.add_argument('-i','--input', type=str, default=None, help='Input model')
 parser.add_argument('-o','--output', type=str, default="model", help='Output model')
+parser.add_argument('-lm','--learn_mode', type=int, default=2, help='Learn mode (0 - none, 1 - positive only, 2 - positive and negative)')
 parser.add_argument('-cs','--context_size', type=int, default=1, help='Context size')
 
 args = parser.parse_args()
@@ -45,8 +46,8 @@ print(f"model={args.input}; states={len(model['states'])}; games={model['games']
 
 #eval = BreakoutHacky() 
 #eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
-#eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=2,debug=False)
-eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=2, context_size=args.context_size)
+#eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=args.learn_mode,debug=False)
+eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=args.learn_mode, context_size=args.context_size)
 
 scores = []
 stepss = []

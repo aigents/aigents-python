@@ -229,7 +229,7 @@ class BreakoutProgrammable(GymPlayer):
                     feedback = reward if reward > 0 else 0 # positive only
                 else:
                     feedback = reward # positive or negative
-                model_add_states(self.model,self.states,feedback)
+                model_add_states_contexts(self.model,self.states,feedback)
                 self.states.clear() # clear the states including the rewarded one to start over with new state and new action on it
             self.states.append(state)
 
@@ -285,6 +285,10 @@ class BreakoutModelDriven(BreakoutProgrammable):
     def __init__(self,actions,model=None,learn_mode=0,context_size=1,debug=False):
         super().__init__(model,learn_mode,context_size,debug)
         self.actions = actions
+        self.state_count_threshold = 2
+        self.state_similarity_threshold = 0.99
+        self.transition_utility_thereshold = 0
+        self.transition_count_threshold = 1
 
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)
@@ -376,16 +380,10 @@ def find_usefulNov32025(transitions,utility_thereshold,count_threshold):
 
 
 # TODO remove or merge later
-class BreakoutModelDrivenNov32025(BreakoutProgrammable):
+class BreakoutModelDrivenNov32025(BreakoutModelDriven):
 
     def __init__(self,actions,model=None,learn_mode=0,context_size=1,debug=False):
-        super().__init__(model=model,context_size=context_size,debug=debug)
-        self.actions = actions
-        self.learn_mode = learn_mode
-        self.state_count_threshold = 2
-        self.state_similarity_threshold = 0.99
-        self.transition_utility_thereshold = 0
-        self.transition_count_threshold = 1
+        super().__init__(model=model,actions=actions,learn_mode=learn_mode,context_size=context_size,debug=debug)
 
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)
