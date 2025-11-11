@@ -181,6 +181,8 @@ class BreakoutProgrammable(GymPlayer):
         self.eval = None
 
         self.model = model
+        if context_size > 1:
+            model_set_context_size(self.model,context_size)
         self.learn_mode = learn_mode
         self.context_size = context_size
         self.context_states = deque(maxlen=context_size) # all very latest states
@@ -296,16 +298,16 @@ class BreakoutModelDriven(BreakoutProgrammable):
         states = self.model['states']
         try:
             found = states[state]
-            match = 'exact'
+            match = 'exact1'
         except KeyError:
             found = find_similar(states,state, state_count_threshold=2, state_similarity_threshold=0.99)
-            match = 'exact'
+            match = 'similar1'
 
         if not found is None:
             (utility,count,transitions) = found
             #print('found',match,state,'=>',found,'=',len(transitions))
             # new code TODO: fix and test!!!
-            return find_useful_action(self.actions,transitions, transition_utility_thereshold=None, transition_count_threshold=1)
+            return find_useful_action(self.actions,transitions, transition_utility_thereshold=0, transition_count_threshold=1)
             # old code:
             best = find_useful(transitions,transition_utility_thereshold=0,transition_count_threshold=1)
             if not best is None:
@@ -376,10 +378,14 @@ def find_usefulNov32025(transitions,utility_thereshold,count_threshold):
 # TODO remove or merge later
 class BreakoutModelDrivenNov32025(BreakoutProgrammable):
 
-    def __init__(self,actions,model=None,learn_mode=0,debug=False):
-        super().__init__(model,debug)
+    def __init__(self,actions,model=None,learn_mode=0,context_size=1,debug=False):
+        super().__init__(model=model,context_size=context_size,debug=debug)
         self.actions = actions
         self.learn_mode = learn_mode
+        self.state_count_threshold = 2
+        self.state_similarity_threshold = 0.99
+        self.transition_utility_thereshold = 0
+        self.transition_count_threshold = 1
 
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)
@@ -394,22 +400,33 @@ class BreakoutModelDrivenNov32025(BreakoutProgrammable):
                     feedback = reward if reward > 0 else 0 # positive only
                 else:
                     feedback = reward # positive or negative
-                model_add_states(self.model,self.states,feedback)
+                model_add_states_contexts(self.model,self.states,feedback)
                 self.states.clear() # clear the states including the rewarded one to start over with new state and new action on it
             self.states.append(state)
 
-        states = self.model['states']
-        try:
-            found = states[state]
-            match = 'exact'
-        except KeyError:
-            found = find_similarNov32025_with_rand(states,state,2,0.99) # HACK: threshold!?
-            match = 'exact'
+        found = None
+        if self.context_size > 1 and len(self.states) > 1: #TODO make other than 2
+            context = sum(self.states[-2:],())
+            contexts = self.model['contexts'][2] #TODO make other than 2
+            try:
+                found = contexts[context]
+                match = 'exact2'
+            except KeyError:
+                found = find_similarNov32025_with_rand(contexts,context, self.state_count_threshold, self.state_similarity_threshold )
+                match = 'exact2'
+        if found is None:
+            states = self.model['states']
+            try:
+                found = states[state]
+                match = 'exact1'
+            except KeyError:
+                found = find_similarNov32025_with_rand(states,state, self.state_count_threshold, self.state_similarity_threshold)
+                match = 'exact1'
 
         if not found is None:
             (utility,count,transitions) = found
             #print('found',match,state,'=>',found,'=',len(transitions))
-            best = find_usefulNov32025(transitions,None,1)
+            best = find_usefulNov32025(transitions, self.transition_utility_thereshold, self.transition_count_threshold)
             if not best is None:
                 #print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
                 return best[0]

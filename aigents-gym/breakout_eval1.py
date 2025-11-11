@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser(description='Open AI Gym Evaluator')
 parser.add_argument('-r','--render', type=str, default=None, help='Render mode') # human
 parser.add_argument('-i','--input', type=str, default=None, help='Input model')
 parser.add_argument('-o','--output', type=str, default="model", help='Output model')
+parser.add_argument('-cs','--context_size', type=int, default=1, help='Context size')
 
 args = parser.parse_args()
 
@@ -44,8 +45,8 @@ print(f"model={args.input}; states={len(model['states'])}; games={model['games']
 
 #eval = BreakoutHacky() 
 #eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
-eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=2,debug=False)
-#eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=1)
+#eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=2,debug=False)
+eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=2, context_size=args.context_size)
 
 scores = []
 stepss = []
@@ -93,8 +94,7 @@ while (game < max_games):
         pass
 
     # If the episode has ended then we can reset to start a new episode
-    #if terminated or truncated or steps == max_steps:
-    if terminated or truncated: # need to reach max 860 (reached) or 864 (not reached)
+    if terminated or truncated or steps == max_steps:
         t1 = dt.datetime.now()
         lapse = t1 - t0
         t0 = t1
