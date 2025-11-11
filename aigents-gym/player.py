@@ -280,7 +280,7 @@ class BreakoutProgrammable(GymPlayer):
         return act
 
 
-class BreakoutModelDriven(BreakoutProgrammable):
+class BreakoutModelDriven(BreakoutProgrammable): # State-based History-aware Artificial Reinforcement Intelligent Kernel (SHARIK)
 
     def __init__(self,actions,model=None,learn_mode=0,context_size=1,debug=False):
         super().__init__(model,learn_mode,context_size,debug)

@@ -23,9 +23,11 @@ def cosine_similarity(a,b):
 
 def model_set_context_size(model,context_size=1):
     if context_size > 1:
-        model['contexts'] = {}
-        for size in range(2,context_size+1):
-            model['contexts'][size] = {}
+        if not 'contexts' in model: 
+            model['contexts'] = {}
+            for size in range(2,context_size+1):
+                if not size in model['contexts']:
+                    model['contexts'][size] = {}
     return model
 
 def model_new(context_size=1):
