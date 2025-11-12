@@ -282,13 +282,14 @@ class BreakoutProgrammable(GymPlayer):
 
 class BreakoutModelDriven(BreakoutProgrammable): # State-based History-aware Artificial Reinforcement Intelligent Kernel (SHARIK)
 
-    def __init__(self,actions,model=None,learn_mode=0,context_size=1,debug=False):
+    def __init__(self,actions,model=None,learn_mode=0,context_size=1,args=None,debug=False):
         super().__init__(model,learn_mode,context_size,debug)
         self.actions = actions
-        self.state_count_threshold = 2
-        self.state_similarity_threshold = 0.99
-        self.transition_utility_thereshold = 0
-        self.transition_count_threshold = 1
+        self.state_count_threshold = 2 if args is None else args.state_count
+        self.state_similarity_threshold = 0.9 if args is None else args.state_similarity
+        self.transition_utility_thereshold = 0 if args is None else args.transition_utility
+        self.transition_count_threshold = 1 if args is None else args.transition_count
+        print(f"count_threshold={self.state_count_threshold}; state_similarity={self.state_similarity_threshold}; transition_utility={self.transition_utility_thereshold}; transition_count={self.transition_count_threshold}")
 
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)
@@ -382,8 +383,8 @@ def find_usefulNov32025(transitions,utility_thereshold,count_threshold):
 # TODO remove or merge later
 class BreakoutModelDrivenNov32025(BreakoutModelDriven):
 
-    def __init__(self,actions,model=None,learn_mode=0,context_size=1,debug=False):
-        super().__init__(model=model,actions=actions,learn_mode=learn_mode,context_size=context_size,debug=debug)
+    def __init__(self,actions,model=None,learn_mode=0,context_size=1,args=None,debug=False):
+        super().__init__(model=model,actions=actions,learn_mode=learn_mode,context_size=context_size,args=args,debug=debug)
 
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)

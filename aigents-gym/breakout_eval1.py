@@ -13,6 +13,10 @@ parser.add_argument('-i','--input', type=str, default=None, help='Input model')
 parser.add_argument('-o','--output', type=str, default="model", help='Output model')
 parser.add_argument('-lm','--learn_mode', type=int, default=2, help='Learn mode (0 - none, 1 - positive only, 2 - positive and negative)')
 parser.add_argument('-cs','--context_size', type=int, default=1, help='Context size')
+parser.add_argument('-sc','--state_count', type=int, default=2, help='State count threshold')
+parser.add_argument('-ss','--state_similarity', type=float, default=0.9, help='State similarity threshold')
+parser.add_argument('-tu','--transition_utility', type=int, default=0, help='Transition utility thereshold')
+parser.add_argument('-tc','--transition_count', type=int, default=1, help='Transition count threshold')
 
 args = parser.parse_args()
 
@@ -42,12 +46,12 @@ if hasattr(env, 'get_action_meanings'):
 #model = model_new()
 #model=model_read_file(args.model)
 model = model_new() if args.input is None else model_read_file(args.input)
-print(f"model={args.input}; states={len(model['states'])}; games={model['games']}")
+print(f"model={args.input}; states={len(model['states'])}; games={model['games']}; steps={model['steps']}")
 
 #eval = BreakoutHacky() 
 #eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
 #eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=args.learn_mode,debug=False)
-eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=args.learn_mode, context_size=args.context_size)
+eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=args.learn_mode, context_size=args.context_size, args=args)
 
 scores = []
 stepss = []
@@ -122,7 +126,7 @@ while (game < max_games):
             print('lapses =', lapses)
             if not model is None:
                 print('states =', states)
-                model['games'] = +game
+                model['games'] += game
                 model_write_file(args.output,model)
         action = 1 # HACK: restarting the game !?
         continue # HACK: restarting the game !?
