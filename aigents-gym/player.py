@@ -289,7 +289,6 @@ class BreakoutModelDriven(BreakoutProgrammable): # State-based History-aware Art
         self.state_similarity_threshold = 0.9 if args is None else args.state_similarity
         self.transition_utility_thereshold = 0 if args is None else args.transition_utility
         self.transition_count_threshold = 1 if args is None else args.transition_count
-        print(f"count_threshold={self.state_count_threshold}; state_similarity={self.state_similarity_threshold}; transition_utility={self.transition_utility_thereshold}; transition_count={self.transition_count_threshold}")
 
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)
@@ -344,6 +343,7 @@ def find_similarNov32025(states,state,count_threshold,similarity_threshold):
     return states[best] if not best is None else None
 
 def find_similarNov32025_with_rand(states,state,count_threshold,similarity_threshold):
+    #print(f'find_similarNov32025_with_rand count_threshold={count_threshold} similarity_threshold={similarity_threshold}')
     max_sim = 0
     bests = []
     for s, utility_count in states.items():
@@ -362,6 +362,7 @@ def find_similarNov32025_with_rand(states,state,count_threshold,similarity_thres
     return states[best] if not best is None else None
 
 def find_usefulNov32025(transitions,utility_thereshold,count_threshold):
+    #print(f'find_usefulNov32025 utility_thereshold={utility_thereshold} count_threshold={count_threshold}')
     max_utility = None
     max_count = 0
     best = None
@@ -385,6 +386,7 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
 
     def __init__(self,actions,model=None,learn_mode=0,context_size=1,args=None,debug=False):
         super().__init__(model=model,actions=actions,learn_mode=learn_mode,context_size=context_size,args=args,debug=debug)
+        print(f"learn_mode={self.learn_mode}; context_size={self.context_size}; state_count={self.state_count_threshold}; state_similarity={self.state_similarity_threshold}; transition_utility={self.transition_utility_thereshold}; transition_count={self.transition_count_threshold}")
 
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)
@@ -399,7 +401,9 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
                     feedback = reward if reward > 0 else 0 # positive only
                 else:
                     feedback = reward # positive or negative
+                #print(f"learn_mode={self.learn_mode}; context_size={self.context_size}; state_count={self.state_count_threshold}; state_similarity={self.state_similarity_threshold}; transition_utility={self.transition_utility_thereshold}; transition_count={self.transition_count_threshold}")
                 model_add_states_contexts(self.model,self.states,feedback)
+                #print(len(self.model['states']),len(self.model['contexts'][2]))
                 self.states.clear() # clear the states including the rewarded one to start over with new state and new action on it
             self.states.append(state)
 
