@@ -18,7 +18,7 @@ parser.add_argument('-lm','--learn_mode', type=int, default=2, help='Learn mode 
 parser.add_argument('-cs','--context_size', type=int, default=1, help='Context size')
 parser.add_argument('-sc','--state_count', type=int, default=2, help='State count threshold')
 parser.add_argument('-ss','--state_similarity', type=float, default=0.9, help='State similarity threshold')
-parser.add_argument('-tu','--transition_utility', type=int, default=0, help='Transition utility thereshold')
+parser.add_argument('-tu','--transition_utility', type=int, default=None, help='Transition utility thereshold')
 parser.add_argument('-tc','--transition_count', type=int, default=1, help='Transition count threshold')
 
 args = parser.parse_args()
@@ -57,8 +57,8 @@ print(f"model=\"{args.input}\"; states={len(model['states'])}; games={model['gam
 
 #eval = BreakoutHacky() 
 #eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False)
-#eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=args.learn_mode,debug=False)
-eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=args.learn_mode, context_size=args.context_size, args=args)
+eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=args.learn_mode, context_size=args.context_size, args=args, debug=False)
+#eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=args.learn_mode, context_size=args.context_size, args=args)
 
 scores = []
 stepss = []

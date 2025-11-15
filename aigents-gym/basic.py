@@ -207,9 +207,8 @@ def find_useful_action(actions,transitions,transition_utility_thereshold,transit
             acts.append(a)
         elif max_uc == uc:
             acts.append(a)
-    act = acts[0] if len(acts) == 1 else random.choice(actions)
-    if False:#debug:
-        print(str(actions_uc),str({a:round(actions_uc[a]) for a,k in enumerate(actions)}),act)
+    act = acts[0] if len(acts) == 1 else random.choice(acts)
+    #print(str(actions_uc),str({a:round(actions_uc[a]) for a in acts}),act)
     return act
 
 
