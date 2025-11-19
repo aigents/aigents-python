@@ -311,7 +311,8 @@ class BreakoutModelDriven(BreakoutProgrammable): # State-based History-aware Art
                 found = contexts[context]
                 match = 'exact2'
             except KeyError:
-                found = find_similar(contexts,context, self.state_count_threshold, self.state_similarity_threshold )
+                if self.state_similarity_threshold < 1.0:
+                    found = find_similar(contexts,context, self.state_count_threshold, self.state_similarity_threshold )
                 match = 'similar2'
         if found is None:
             states = self.model['states']
@@ -319,7 +320,8 @@ class BreakoutModelDriven(BreakoutProgrammable): # State-based History-aware Art
                 found = states[state]
                 match = 'exact1'
             except KeyError:
-                found = find_similar(states,state, self.state_count_threshold, self.state_similarity_threshold)
+                if self.state_similarity_threshold < 1.0:
+                    found = find_similar(states,state, self.state_count_threshold, self.state_similarity_threshold)
                 match = 'similar1'
 
         if not found is None:
@@ -425,8 +427,10 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
 
         if not found is None:
             (utility,count,transitions) = found
-            #print('found',match,state,'=>',found,'=',len(transitions))
             best = find_usefulNov32025(transitions, self.transition_utility_thereshold, self.transition_count_threshold)
+            #print('found',match,state,'=>',found,'=',len(transitions))
+            #print(str([(transitions[t][0],transitions[t][1],t[0]) for t in transitions]))
+            #print(best)
             if not best is None:
                 #print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
                 return best[0]
