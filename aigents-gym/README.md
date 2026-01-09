@@ -2,7 +2,7 @@
 
 ## TODO
 
-- TODO play with ddifferent rendom seeds
+- TODO play with different rendom seeds
   - find "the right (stable) seed" to play with HP
   - make sure the perfromance is seed-agnistic
 
@@ -65,3 +65,10 @@
 ## Diary
 
 ### ... 
+
+## References
+
+- https://arxiv.org/abs/2509.07009
+- https://arxiv.org/abs/2512.10985
+- https://arxiv.org/abs/2511.22130
+- 
