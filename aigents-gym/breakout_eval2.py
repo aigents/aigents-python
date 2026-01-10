@@ -57,9 +57,9 @@ model = model_new() if args.input is None else model_read_file(args.input)
 print(f"model=\"{args.input}\"; states={len(model['states'])}; games={model['games']}; steps={model['steps']}")
 
 #eval = BreakoutHacky() # always 732 
-eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False) # seed=1 => [414.0, 439.0, 428.0]; seed=42 => 414.0, 535.0, 562.0; seedd=100 => [716.0, 471.0, 721.0]
+#eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False) # seed=1 => [414.0, 439.0, 428.0]; seed=42 => 414.0, 535.0, 562.0; seedd=100 => [716.0, 471.0, 721.0]
+eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=args.learn_mode, context_size=args.context_size, args=args)
 #eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=args.learn_mode, context_size=args.context_size, args=args, debug=False)
-#eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=args.learn_mode, context_size=args.context_size, args=args)
 
 scores = []
 stepss = []

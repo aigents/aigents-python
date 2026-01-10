@@ -3,8 +3,10 @@
 ## TODO
 
 - TODO play with different rendom seeds
+  - make random seed working for learning
   - find "the right (stable) seed" to play with HP
-  - make sure the perfromance is seed-agnistic
+  - make sure the perfromance is seed-agnostic
+  - remove action = 1 # HACK
 
 - TODO draft paper of ICML https://icml.cc/
   - ...
