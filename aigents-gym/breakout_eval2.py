@@ -24,10 +24,6 @@ parser.add_argument('-tc','--transition_count', type=int, default=1, help='Trans
 
 args = parser.parse_args()
 
-t0 = dt.datetime.now()
-grand_t0 = t0
-print(f'rev=\"{subprocess.getoutput("git rev-parse HEAD")}\"; time=\"{str(grand_t0)}\"; max_games={args.max_games}; max_steps={args.max_steps}; seed={args.seed}')
-
 # Initialise the environment
 #env = gym.make("LunarLander-v3", render_mode="human") # works
 
@@ -36,6 +32,22 @@ print(f'rev=\"{subprocess.getoutput("git rev-parse HEAD")}\"; time=\"{str(grand_
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human') # works
 #env = gym.make('BreakoutNoFrameskip-v4', render_mode='human', obs_type="grayscale") 
 env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale", render_mode=args.render)
+
+t0 = dt.datetime.now()
+grand_t0 = t0
+print(f'rev=\"{subprocess.getoutput("git rev-parse HEAD")}\"; time=\"{str(grand_t0)}\"; max_games={args.max_games}; max_steps={args.max_steps}; seed={args.seed}')
+
+#model = None
+#model = model_new()
+#model=model_read_file(args.model)
+model = model_new() if args.input is None else model_read_file(args.input)
+print(f"model=\"{args.input}\"; states={len(model['states'])}; games={model['games']}; steps={model['steps']}")
+
+#eval = BreakoutHacky() # always 860 (108000 steps) or 732 (18000 steps) 
+#eval = BreakoutXXProgrammable()
+#eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False) # seed=1 => [414.0, 439.0, 428.0]; seed=42 => 414.0, 535.0, 562.0; seedd=100 => [716.0, 471.0, 721.0]
+eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=args.learn_mode, context_size=args.context_size, args=args)
+#eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=args.learn_mode, context_size=args.context_size, args=args, debug=False)
 
 # For discrete action spaces (like Atari games)
 if hasattr(env.action_space, 'n'):
@@ -50,16 +62,6 @@ if hasattr(env, 'get_action_meanings'):
     for i, meaning in enumerate(action_meanings):
         print(f"Action {i}: {meaning}")
 
-#model = None
-#model = model_new()
-#model=model_read_file(args.model)
-model = model_new() if args.input is None else model_read_file(args.input)
-print(f"model=\"{args.input}\"; states={len(model['states'])}; games={model['games']}; steps={model['steps']}")
-
-#eval = BreakoutHacky() # always 732 
-#eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False) # seed=1 => [414.0, 439.0, 428.0]; seed=42 => 414.0, 535.0, 562.0; seedd=100 => [716.0, 471.0, 721.0]
-eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=args.learn_mode, context_size=args.context_size, args=args)
-#eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=args.learn_mode, context_size=args.context_size, args=args, debug=False)
 
 scores = []
 stepss = []
@@ -83,7 +85,7 @@ else:
     random.seed(args.seed)
     observation, info = env.reset(seed=args.seed)
 #action = env.action_space.sample()
-action = 1 # HACK: setting the game!?
+action = 1 # HACK: otherwise random seed is not fixed!
 while (game < args.max_games):
     # this is where you would insert your policy
     # if action is None:
@@ -139,8 +141,8 @@ while (game < args.max_games):
                 model['games'] += game
                 model_write_file(args.output,model)
         #action = env.action_space.sample()
-        action = 1 # HACK: restarting the game !?
-        continue # HACK: restarting the game !?
+        action = 1 # HACK: otherwise random seed is not fixed!
+        continue
 
     action = eval.process_state(observation, reward, action) # pass previous observation, reward (may be negative) and past action (remembered) in 
 
