@@ -407,7 +407,17 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
             self.states.append(state)
 
         found = None
-        if self.context_size > 1 and len(self.states) > 1: #TODO make other than 2
+        #TODO compact this code with cs going down from self.context_size to 1
+        if self.context_size > 2 and len(self.states) > 2: #TODO make other than 3
+            context = sum(self.states[-3:],())
+            contexts = self.model['contexts'][3] #TODO make other than 3
+            try:
+                found = contexts[context]
+                match = 'exact3'
+            except KeyError:
+                found = find_similarNov32025_with_rand(contexts,context, self.state_count_threshold, self.state_similarity_threshold )
+                match = 'similar3'
+        if found is None and self.context_size > 1 and len(self.states) > 1: #TODO make other than 2
             context = sum(self.states[-2:],())
             contexts = self.model['contexts'][2] #TODO make other than 2
             try:

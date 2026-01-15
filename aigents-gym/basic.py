@@ -55,7 +55,7 @@ def model_write_file(model_name, model):
     with open(model_path, 'wb') as f:
         pickle.dump(model, f)
 
-#TODO optional exponentional reward deccay
+#TODO optional exponentional reward decay OR remove if not used? 
 def model_add_states(model,states,global_feeddback):
     """
     Add emotionally valuable episode of N of states with some global feeddback
@@ -85,6 +85,7 @@ assert(str(model_add_states(model_new(),[(0,0),(0,1)],0))=="{'steps': 2, 'games'
 assert(str(model_add_states(model_new(),[(0,0),(0,1),(0,0),(0,1)],0))=="{'steps': 4, 'games': 0, 'states': {(0, 0): (0, 2, {(0, 1): (0, 2)}), (0, 1): (0, 2, {(0, 0): (0, 1)})}}")
 assert(str(model_add_states(model_new(),[(0,0),(0,1),(0,0),(0,1)],1))=="{'steps': 4, 'games': 0, 'states': {(0, 0): (2, 2, {(0, 1): (2, 2)}), (0, 1): (2, 2, {(0, 0): (1, 1)})}}")
 
+#TODO optional exponentional reward decay?
 def model_add_state_transitions(model_states,previous,state,global_feeddback):
     if state in model_states:
         (utility, count, transitions) = model_states[state]
@@ -142,7 +143,7 @@ assert(str(model_new(context_size=2))=="{'steps': 0, 'games': 0, 'states': {}, '
 assert(str(model_add_states_contexts(model_new(context_size=2),[(1,1),(2,2),(3,3)],0))=="{'steps': 3, 'games': 0, 'states': {(1, 1): (0, 1, {(2, 2): (0, 1)}), (2, 2): (0, 1, {(3, 3): (0, 1)}), (3, 3): (0, 1, {})}, 'contexts': {2: {(1, 1, 2, 2): (0, 1, {(3, 3): (0, 1)})}}}")
 assert(str(model_add_states_contexts(model_new(context_size=2),[(1,1),(2,2),(3,3),(4,4)],1)['contexts'])=="{2: {(1, 1, 2, 2): (1, 1, {(3, 3): (1, 1)}), (2, 2, 3, 3): (1, 1, {(4, 4): (1, 1)})}}")
 assert(str(model_add_states_contexts(model_new(context_size=2),[(1,1),(2,2),(1,1),(2,2),(3,3)],1)['contexts'])=="{2: {(1, 1, 2, 2): (2, 2, {(1, 1): (1, 1), (3, 3): (1, 1)}), (2, 2, 1, 1): (1, 1, {(2, 2): (1, 1)})}}")
-
+assert(str(model_add_states_contexts(model_new(context_size=3),[(1,1),(2,2),(1,1),(2,2),(3,3)],1)['contexts'])=="{2: {(1, 1, 2, 2): (2, 2, {(1, 1): (1, 1), (3, 3): (1, 1)}), (2, 2, 1, 1): (1, 1, {(2, 2): (1, 1)})}, 3: {(1, 1, 2, 2, 1, 1): (1, 1, {(2, 2): (1, 1)}), (2, 2, 1, 1, 2, 2): (1, 1, {(3, 3): (1, 1)})}}")
 
 def find_similar(states,state,state_count_threshold,state_similarity_threshold):
     max_sim = 0
