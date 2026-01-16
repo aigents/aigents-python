@@ -12,22 +12,22 @@
   - if action = 1 at game (re)start: wins 860 (out of top 864 points) always (regardless of random seed) if not limited by number of steps per game (108000 steps max) or 732 (regardless of random seed) if limited by 18000 steps
 - ...
 
+## DONE
+- 2026-01-09/.../16 Experiments with different random seeds, selected: 41 (best), 3 (average), 2 (worst)
+- 2026-01-09/.../16 Experiment with hyper-parameters for the best seed (41): LM=2, TU=0, CS=2, TC=1, SC=2, SR=True, SS=0.9/0.95
 
 ## TODO
-
-- play with different random seeds
-  - find "the right (stable) seed" to play with HP - PROGRESS
+- 2026-01-13/... run up to 5K games with selected seeds for SS=0.9 and SS=0.95, to collect the difference (make sure the performance is seed-agnostic)
+  - 41 (PROGRESS)
+  - 3 (PROGRESS)
+  - 2 (PROGRESS)
 - play with HP for the "best model" to make it learning more stable and predictable
-  - SC = 3 (PROGRESS)
-  - remove reward/punishment from state (PROGRESS)
   - represent action as 5 "hots" so (TODO)
      - similarity is computed more accurately
      - we can correlate actions with moves (add Xracket derivative?)  
   - utility vs count vs utility * count - for the "best model" to improve it
   - replace Xr+Cb with Dx  
   - denominate U by number of states (energy spent)?
-- make sure the performance is seed-agnostic
-  - run up to 3-5K with three different seeds for SS=0.9 and SS=0.95, to collect the difference!? 
 - remove action = 1 # HACK, replace with action = env.action_space.sample() (inter-play 1-FIRE hardcoding)
 - model on racket_x - ball_x, racket_speed, ball_speed - PROGRESS
   - python ./aigents-gym/breakout_eval2.py -cs=2 -ss=0.9 -tu=0 -s=41 -o=202501112_relx_s41
@@ -71,10 +71,6 @@
 - small internal feedback for finding novel situations!!!???
 
 
-
-## Diary
-
-- ... 
 
 ## References
 
