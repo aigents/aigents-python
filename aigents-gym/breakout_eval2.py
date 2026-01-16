@@ -35,7 +35,8 @@ env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale", render_mode=args.
 
 t0 = dt.datetime.now()
 grand_t0 = t0
-print(f'rev=\"{subprocess.getoutput("git rev-parse HEAD")}\"; time=\"{str(grand_t0)}\"; max_games={args.max_games}; max_steps={args.max_steps}; seed={args.seed}')
+rev = subprocess.getoutput("git rev-parse HEAD")
+print(f'rev=\"{rev}\"; time=\"{str(grand_t0)}\"; max_games={args.max_games}; max_steps={args.max_steps}; seed={args.seed}')
 
 #model = None
 #model = model_new()
@@ -46,7 +47,7 @@ print(f"model=\"{args.input}\"; states={len(model['states'])}; games={model['gam
 #eval = BreakoutHacky() # always 860 (108000 steps) or 732 (18000 steps) 
 #eval = BreakoutXXProgrammable()
 #eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False) # seed=1 => [414.0, 439.0, 428.0]; seed=42 => 414.0, 535.0, 562.0; seedd=100 => [716.0, 471.0, 721.0]
-eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=args.learn_mode, context_size=args.context_size, args=args)
+eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=args.learn_mode, context_size=args.context_size, args=args, state_reward = True)
 #eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=args.learn_mode, context_size=args.context_size, args=args, debug=False)
 
 # For discrete action spaces (like Atari games)
@@ -130,7 +131,7 @@ while (game < args.max_games):
         if game == (args.max_games):
             grand_t1 = t1
             total_time = grand_t1 - grand_t0
-            print(f'rev=\"{subprocess.getoutput("git rev-parse HEAD")}\"; time=\"{str(grand_t0)}\"; max_games={args.max_games}; max_steps={args.max_steps}; seed={args.seed}')
+            print(f'rev=\"{rev}\"; time=\"{str(grand_t0)}\"; max_games={args.max_games}; max_steps={args.max_steps}; seed={args.seed}')
             print(f"score_avg={round(np.mean(scores),1)}; steps_avg={round(np.mean(stepss),1)}; lives_avg={round(np.mean(livess),1)}; lapse_avg=\"{str(lapse)}\"; time=\"{str(total_time)}\"")
             print('scores =', scores)
             print('stepss =', stepss)

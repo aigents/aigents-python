@@ -18,9 +18,9 @@
 - play with different random seeds
   - find "the right (stable) seed" to play with HP - PROGRESS
 - play with HP for the "best model" to make it learning more stable and predictable
-  - SC = 3 (TODO commit)
-  - remove reward/punishment from state?
-  - represent action as 5 "hots" so
+  - SC = 3 (PROGRESS)
+  - remove reward/punishment from state (PROGRESS)
+  - represent action as 5 "hots" so (TODO)
      - similarity is computed more accurately
      - we can correlate actions with moves (add Xracket derivative?)  
   - utility vs count vs utility * count - for the "best model" to improve it
