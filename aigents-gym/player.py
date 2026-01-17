@@ -384,19 +384,21 @@ def find_usefulNov32025(transitions,utility_thereshold,count_threshold):
 # TODO remove or merge later
 class BreakoutModelDrivenNov32025(BreakoutModelDriven):
 
-    def __init__(self,actions,model=None,learn_mode=0,context_size=1,args=None,state_reward=True,debug=False):
+    def __init__(self,actions,model=None,learn_mode=0,context_size=1,args=None,state_reward=True,encode_action=False,debug=False):
         super().__init__(model=model,actions=actions,learn_mode=learn_mode,context_size=context_size,args=args,debug=debug)
         self.state_reward = state_reward
+        self.encode_action = encode_action
 
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)
 
         # find racket & ball X
         (racket_col, ball_col) = self.racket_ball_x(observation)
+        state_action = one_hot(previous_action,len(self.actions)) if self.encode_action else (previous_action,)
         if self.state_reward:
-            state = (previous_action,)+(1 if reward > 0 else 0,1 if reward < 0 else 0)+(racket_col, ball_col)
+            state = state_action+(1 if reward > 0 else 0,1 if reward < 0 else 0)+(racket_col, ball_col)
         else:
-            state = (previous_action,)+(racket_col, ball_col)
+            state = state_action+(racket_col, ball_col)
 
         if not self.model is None and self.learn_mode != 0:
             if reward != 0:
@@ -450,7 +452,8 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
             #print(best)
             if not best is None:
                 #print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
-                return best[0]
+                action = one_hot_idx(best[:len(self.actions)]) if self.encode_action else best[0]
+                return action
 
         #print("found none")
         return random.choice(self.actions)

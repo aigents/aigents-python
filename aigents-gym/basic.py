@@ -14,6 +14,30 @@ def print_debug(array2d):
         print(debug_array2str(a,1),row)
         row += 1
 
+def one_hot(val,size):
+    if val < 0 or val >= size:
+        raise IndexError
+    lst = [0] * size
+    lst[val] = 1
+    return tuple(lst)
+assert(str(one_hot(0,4))=='(1, 0, 0, 0)')
+assert(str(one_hot(1,4))=='(0, 1, 0, 0)')
+assert(str(one_hot(2,4))=='(0, 0, 1, 0)')
+assert(str(one_hot(3,4))=='(0, 0, 0, 1)')
+#print(str(one_hot(4,4))) #IndexError
+
+def one_hot_idx(lst):
+    for index, value in enumerate(lst):
+        if value != 0:
+            return index
+    return -1
+assert(one_hot_idx((0,0,0,0))==-1)
+assert(one_hot_idx((1,0,0,0))==0)
+assert(one_hot_idx((0,1,0,0))==1)
+assert(one_hot_idx((0,0,1,0))==2)
+assert(one_hot_idx((0,0,0,1))==3)
+
+
 def get_avg_pos(a,t):
     indexes = np.where(a > t)[0]
     return np.mean(indexes) if len(indexes) > 0 else None

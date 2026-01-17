@@ -22,22 +22,22 @@
   - 3 (PROGRESS)
   - 2 (PROGRESS)
 - play with HP for the "best model" to make it learning more stable and predictable
-  - represent action as 5 "hots" so (TODO)
+  - represent action as 5 "hots" so (PROGRESS)
      - similarity is computed more accurately
      - we can correlate actions with moves (add Xracket derivative?)  
+  - TU sligntly above zero!!!???
   - utility vs count vs utility * count - for the "best model" to improve it
   - replace Xr+Cb with Dx  
   - denominate U by number of states (energy spent)?
-- remove action = 1 # HACK, replace with action = env.action_space.sample() (inter-play 1-FIRE hardcoding)
-- model on racket_x - ball_x, racket_speed, ball_speed - PROGRESS
+- model on racket_x - ball_x, racket_speed, ball_speed (HOLD)
   - python ./aigents-gym/breakout_eval2.py -cs=2 -ss=0.9 -tu=0 -s=41 -o=202501112_relx_s41
+- remove action = 1 # HACK, replace with action = env.action_space.sample() (inter-play 1-FIRE hardcoding)
 
 - find_usefulNov32025 - random ties!
 
 - draft paper of ICML https://icml.cc/
   - ...
 
- 
 - TODO see how "model compression" can affect runtime performance - model_pack.py
 
 - TODO see how "best models" perform in real time
@@ -51,8 +51,6 @@
 - try to feedback by fact of reward, not by amount of reward
 
 - TODO test old code, and unitfy with lateset code!!!
-
-- best_action CS=2 ?
 
 - negative feedback on steps consumed
 

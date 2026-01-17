@@ -47,7 +47,7 @@ print(f"model=\"{args.input}\"; states={len(model['states'])}; games={model['gam
 #eval = BreakoutHacky() # always 860 (108000 steps) or 732 (18000 steps) 
 #eval = BreakoutXXProgrammable()
 #eval = BreakoutProgrammable(model=model,learn_mode=2,debug=False) # seed=1 => [414.0, 439.0, 428.0]; seed=42 => 414.0, 535.0, 562.0; seedd=100 => [716.0, 471.0, 721.0]
-eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=args.learn_mode, context_size=args.context_size, args=args, state_reward = True)
+eval = BreakoutModelDrivenNov32025(list(range(env.action_space.n)), model=model, learn_mode=args.learn_mode, context_size=args.context_size, args=args, encode_action = False)
 #eval = BreakoutModelDriven(list(range(env.action_space.n)),model=model,learn_mode=args.learn_mode, context_size=args.context_size, args=args, debug=False)
 
 # For discrete action spaces (like Atari games)
