@@ -361,7 +361,7 @@ def find_similarNov32025_with_rand(states,state,count_threshold,similarity_thres
     best = bests[0] if len(bests) == 1 else random.choice(bests) if len(bests) > 1 else None
     return states[best] if not best is None else None
 
-def find_usefulNov32025(transitions,utility_thereshold,count_threshold):
+def find_usefulNov32025(transitions,utility_thereshold,count_threshold,counted_utility=False):
     #print(f'find_usefulNov32025 utility_thereshold={utility_thereshold} count_threshold={count_threshold}')
     max_utility = None
     max_count = 0
@@ -372,6 +372,8 @@ def find_usefulNov32025(transitions,utility_thereshold,count_threshold):
             continue
         if count < count_threshold: # disregard rare evidence
             continue
+        if counted_utility:
+            utility *= count
         if max_utility is None or max_utility < utility:
             max_utility = utility
             max_count = count
@@ -384,10 +386,11 @@ def find_usefulNov32025(transitions,utility_thereshold,count_threshold):
 # TODO remove or merge later
 class BreakoutModelDrivenNov32025(BreakoutModelDriven):
 
-    def __init__(self,actions,model=None,learn_mode=0,context_size=1,args=None,state_reward=True,encode_action=False,debug=False):
+    def __init__(self,actions,model=None,learn_mode=0,context_size=1,args=None,state_reward=True,encode_action=False,counted_utility=False,debug=False):
         super().__init__(model=model,actions=actions,learn_mode=learn_mode,context_size=context_size,args=args,debug=debug)
         self.state_reward = state_reward
         self.encode_action = encode_action
+        self.counted_utility = counted_utility
 
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)
@@ -446,7 +449,7 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
 
         if not found is None:
             (utility,count,transitions) = found
-            best = find_usefulNov32025(transitions, self.transition_utility_thereshold, self.transition_count_threshold)
+            best = find_usefulNov32025(transitions, self.transition_utility_thereshold, self.transition_count_threshold, counted_utility=self.counted_utility)
             #print('found',match,state,'=>',found,'=',len(transitions))
             #print(str([(transitions[t][0],transitions[t][1],t[0]) for t in transitions]))
             #print(best)

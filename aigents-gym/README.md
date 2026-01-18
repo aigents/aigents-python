@@ -13,8 +13,8 @@
 - ...
 
 ## DONE
-- 2026-01-09/.../16 Experiments with different random seeds, selected: 41 (best), 3 (average), 2 (worst)
-- 2026-01-09/.../16 Experiment with hyper-parameters for the best seed (41): LM=2, TU=0, CS=2, TC=1, SC=2, SR=True, SS=0.9/0.95
+- 2026-01-09/.../16 Experiments with different random seeds (S) and state similarities (SS), selected: 41 (best), 3 (average), 2 (worst)
+- 2026-01-09/.../16 Experiment with hyper-parameters for the best seed (41), find the best: LM=2, TU=0, CS=2, TC=1, SC=2, SR=True, SS=0.9/0.95
 
 ## TODO
 - 2026-01-13/... run up to 5K games with selected seeds for SS=0.9 and SS=0.95, to collect the difference (make sure the performance is seed-agnostic)
@@ -22,16 +22,17 @@
   - 3 (PROGRESS)
   - 2 (PROGRESS)
 - play with HP for the "best model" to make it learning more stable and predictable
-  - represent action as 5 "hots" so (PROGRESS)
+  - EA (encode_action): represent action as 5 "hots" so (PROGRESS)
      - similarity is computed more accurately
      - we can correlate actions with moves (add Xracket derivative?)  
-  - TU sligntly above zero!!!???
-  - utility vs count vs utility * count - for the "best model" to improve it
+  - TU: 1,2,... (PROGRESS)
+  - CU: utility vs counted_utility = utility * count - for the "best model" to improve it (PROGRESS)
   - replace Xr+Cb with Dx  
   - denominate U by number of states (energy spent)?
 - model on racket_x - ball_x, racket_speed, ball_speed (HOLD)
   - python ./aigents-gym/breakout_eval2.py -cs=2 -ss=0.9 -tu=0 -s=41 -o=202501112_relx_s41
 - remove action = 1 # HACK, replace with action = env.action_space.sample() (inter-play 1-FIRE hardcoding)
+- run 3-4 different seeds for 10K games (with the best HP!) - Round 4!!!
 
 - find_usefulNov32025 - random ties!
 
