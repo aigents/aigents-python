@@ -14,7 +14,8 @@ parser.add_argument('-i','--input', type=str, default=None, help='Input model')
 parser.add_argument('-o','--output', type=str, default="model", help='Output model')
 parser.add_argument('-s','--seed', type=int, default=None, help='Random seed')
 parser.add_argument('-mg','--max_games', type=int, default=1000, help='Maximum games') # 1000 # 2500 # 100
-parser.add_argument('-ms','--max_steps', type=int, default=18000, help='Maximum steps') # 18000 # according to Igor Pivoarov! (but games are truncated at 108000) 
+parser.add_argument('-ms','--max_steps', type=int, default=18000, help='Maximum steps per game') # 18000 # according to Igor Pivoarov! (but games are truncated at 108000) 
+parser.add_argument('-mt','--max_total', type=int, default=100000000, help='Maximum steps total') 
 parser.add_argument('-lm','--learn_mode', type=int, default=2, help='Learn mode (0 - none, 1 - positive only, 2 - positive and negative)')
 parser.add_argument('-cs','--context_size', type=int, default=1, help='Context size')
 parser.add_argument('-sc','--state_count', type=int, default=2, help='State count threshold')
@@ -36,7 +37,7 @@ env = gym.make('BreakoutNoFrameskip-v4', obs_type="grayscale", render_mode=args.
 t0 = dt.datetime.now()
 grand_t0 = t0
 rev = subprocess.getoutput("git rev-parse HEAD")
-print(f'rev=\"{rev}\"; time=\"{str(grand_t0)}\"; max_games={args.max_games}; max_steps={args.max_steps}; seed={args.seed}')
+print(f'rev=\"{rev}\"; time=\"{str(grand_t0)}\"; max_games={args.max_games}; max_steps={args.max_steps}; max_total={args.max_total}; seed={args.seed}')
 
 #model = None
 #model = model_new()
@@ -70,6 +71,7 @@ livess = []
 states = []
 lapses = []
 
+total = 0
 steps = 0
 score = 0
 lives = None
@@ -87,7 +89,7 @@ else:
     observation, info = env.reset(seed=args.seed)
 #action = env.action_space.sample()
 action = 1 # HACK: otherwise random seed is not fixed!
-while (game < args.max_games):
+while (game < args.max_games and total < args.max_total):
     # this is where you would insert your policy
     # if action is None:
     #    action = 2 # env.action_space.sample() # TODO why setting to 0 or 1 crashes on start?
@@ -98,6 +100,7 @@ while (game < args.max_games):
     # receiving the next observation, reward and if the episode has terminated or truncated
     observation, reward, terminated, truncated, info = env.step(action)
     steps += 1
+    total += 1
 
     if lives == None: # Breakout-specific!!!
         lives = info['lives'] # initial amount of lives
@@ -111,7 +114,7 @@ while (game < args.max_games):
         pass
 
     # If the episode has ended then we can reset to start a new episode
-    if terminated or truncated or steps == args.max_steps:
+    if terminated or truncated or steps == args.max_steps or total == args.max_total:
         t1 = dt.datetime.now()
         lapse = t1 - t0
         t0 = t1
@@ -128,7 +131,7 @@ while (game < args.max_games):
         steps = 0 
         lives = None
         game += 1
-        if game == (args.max_games):
+        if game == args.max_games or total == args.max_total:
             grand_t1 = t1
             total_time = grand_t1 - grand_t0
             print(f'rev=\"{rev}\"; time=\"{str(grand_t0)}\"; max_games={args.max_games}; max_steps={args.max_steps}; seed={args.seed}')

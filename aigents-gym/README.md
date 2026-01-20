@@ -14,20 +14,18 @@
 
 ## DONE
 - 2026-01-09/.../16 Experiments with different random seeds (S) and state similarities (SS), selected: 41 (best), 3 (average), 2 (worst)
-- 2026-01-09/.../16 Experiment with hyper-parameters for the best seed (41), find the best: LM=2, TU=0, CS=2, TC=1, SC=2, SR=True, SS=0.9/0.95
+- 2026-01-09/.../16 Experiment with hyper-parameters for the best seed (41), find the best: LM=2, TU=0, CS=2, TC=1, SC=2, SR=True, SS=0.9/0.95, CU=False, EA=False, 
 
 ## TODO
 - 2026-01-13/... run up to 5K games with selected seeds for SS=0.9 and SS=0.95, to collect the difference (make sure the performance is seed-agnostic)
   - 41 (DONE)
   - 3 (PROGRESS)
-  - 2 (PROGRESS)
-- play with HP for the "best model" to make it learning more stable and predictable
-  - EA (encode_action): represent action as 5 "hots" so (PROGRESS)
-     - similarity is computed more accurately
-     - we can correlate actions with moves (add Xracket derivative?)  
-  - TU: 1,2,... (DONE)
-  - CU: utility vs counted_utility = utility * count - for the "best model" to improve it (DONE)
-
+  - 2 
+- draft paper of ICML https://icml.cc/ (PROGRESS)
+- figure out step/frame difference in https://arxiv.org/pdf/1911.08265
+- RE-play with all the HP for the "best model" to make it learning more stable and predictable (based on step/frame counts)
+  - limit training/learning by number of steps (not games) in Millions, count won games!!!???
+  - redo all other HPs
   - replace Xr+Cb with Dx  
   - denominate U by number of states (energy spent)?
 - model on racket_x - ball_x, racket_speed, ball_speed (HOLD)
@@ -36,9 +34,6 @@
 - run 3-4 different seeds for 10K games (with the best HP!) - Round 4!!!
 
 - find_usefulNov32025 - random ties!
-
-- draft paper of ICML https://icml.cc/
-  - State-history based reinforcement or experiential learning
 
 - TODO see how "model compression" can affect runtime performance - model_pack.py
 
@@ -254,10 +249,11 @@ minibatch weight updates or roughly 30 minutes of training time."
       url={https://arxiv.org/abs/1312.5602}, 
 }
 
+
 https://arxiv.org/pdf/1908.04683 => 5 min (18000 frames)
 https://arxiv.org/pdf/1312.5602 => One epoch corresponds to 50000 minibatch weight updates or roughly 30 minutes of training time.
 => 1 epoch in Mnih, 2013 = 30 minutes = 6 X 5 minutes = 108000 frames == capped max frames per game!
-
+=> 100 epochs in Mnih = 100 * 108000 = 10,800,000
 
 
 https://arxiv.org/pdf/2003.13350
