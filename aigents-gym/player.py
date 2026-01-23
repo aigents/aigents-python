@@ -282,6 +282,8 @@ class BreakoutProgrammable(GymPlayer):
         return act
 
 
+# New code after Nov 3 2025 - performs worse TODO explore why
+
 class BreakoutModelDriven(BreakoutProgrammable): # State-based History-aware Artificial Reinforcement Intelligent Kernel (SHARIK)
 
     def __init__(self,actions,model=None,learn_mode=0,context_size=2,args=None,debug=False):
@@ -340,7 +342,7 @@ class BreakoutModelDriven(BreakoutProgrammable): # State-based History-aware Art
         return random.choice(self.actions)
 
 
-## Old code from Nov 3 2025 TODO remove later!?
+## Old code from Nov 3 2025 - performs better now TODO explore why 
 
 def find_similarNov32025_with_rand(states,state,count_threshold,similarity_threshold):
     #print(f'find_similarNov32025_with_rand count_threshold={count_threshold} similarity_threshold={similarity_threshold}')
