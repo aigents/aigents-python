@@ -1,19 +1,19 @@
-# State-based History-aware Artificiall Reinforcement Intelligence Kernel (Sharik) 1.2 - Files, Classes and TODO
-
-## Files
-
-- [breakout_hack_simple.py](./breakout_hack_simple.py) - "cheating" Breakout player, knows rules of the game and properties of the game field, wins 860 (out of top 864 points) always if not limited by number of steps per game
-- [breakout_hack_simple1.py](./breakout_hack_simple1.py) - same as above logic wrapped in BreakoutHacky
-- [breakout_eval2.py](./breakout_eval2.py)
-
-## Classes
-
-- player.BreakoutHacky - "cheating" Breakout player, knows rules of the game and properties of the game field
-  - if action = env.action_space.sample() at game (re)start: wins 831/860 (out of top 864 points, varies even with fixed random seed) if not limited by number of steps per game (108000 steps max) or 616/725/732/856 (varies even with fixed random seed) if limited by 18000 steps
-  - if action = 1 at game (re)start: wins 860 (out of top 864 points) always (regardless of random seed) if not limited by number of steps per game (108000 steps max) or 732 (regardless of random seed) if limited by 18000 steps
-- ...
+# State-based History-aware Artificial Reinforcement Intelligence Kernel (Sharik) 1.2 - TODO
 
 ## TODO NEXT
+- goals
+  - per/step evaluation
+  - "learning stabilty"
+  - "representation learning" https://www.nature.com/articles/s41592-025-02729-9 Interpretable representation learning for 3D multi-piece intracellular structures using point clouds
+  - "energy-awareness"
+  - "model compression"
+  - "multiple environments"
+  - "cross-environmental generalization"
+
+- learning stability
+  - run 1M steps/frames with different seeds, find average score
+  - run this with different seeds, find "sweet seed"
+
 - figure out step/frame difference in https://arxiv.org/pdf/1911.08265
 - RE-play with all the HP for the "best model" to make it learning more stable and predictable (based on step/frame counts)
   - limit training/learning by number of steps (not games) in Millions, count won games!!!???
@@ -75,9 +75,4 @@
 - https://arxiv.org/abs/2002.06038 - NGU: 576-864
 - https://arxiv.org/pdf/2003.13350 - Agent57: 790 (multi-agent), Badia, 2020, Agent57: Outperforming the Atari Human Benchmark,
 - https://arxiv.org/abs/1911.08265 MuZero: 864, planning, hidden state, Schrittwieser 2020, Mastering Atari, Go, chess and shogi by planning with a learned model
-
-
-
-
-
 
