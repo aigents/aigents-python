@@ -1,6 +1,33 @@
 # State-based History-aware Artificial Reinforcement Intelligence Kernel (Sharik) 1.2 - TODO
 
 ## TODO NEXT
+- review-based improvements
+  - It would be better to show more results on different environments. The paper conducts limited evaluations, the model is tested only on one environment
+  - It uses a custom computer vision algorithm for preprocessing which makes it hard for the model to generalize to other environments.
+  - The models being compared (DQN, IQN) operate on raw pixels and may not provide a fair comparison.
+  - The evaluation doesn't use standard benchmarking protocols (e.g., reporting mean and standard deviation across multiple seeds as is standard practice), making comparison with existing literature difficult.
+  - The proposed method is explained in an unclear manner, I would request the authors to add pseudocode for their approach to simplify and strengthen the paper.
+  - The paper lacks any theoretical analysis or convergence guarantees for the learning algorithm.
+  - The paper claims interpretability, but does not demonstrate this through examples. I would recommend showing how it can be inspected or visualized to derive meaningful insights to strengthen the contribution.
+  - How does the approach scale to larger state spaces? I would like to request the authors to reflect on the memory consumption with respect to the graph size?
+  - How much is the approach dependent on hand-crafted features? How does the model perform if noise is added to these features?
+  - Could the authors report their results using standard benchmarking protocols for direct comparison with deep reinforcement learning methods?
+
+  - there isn't enough context in the abstract when authors say "A new interpretable experimental learning model based on state history and global feedback is presented." in regards to what topic, what is being discussed here? Is this a RL model, is it a ML model, What is experimental learning?
+  - overall the presentation is poor and I find quite enough details left out of the writing, which makes it harder for reader to understand the model being presented.
+  - I also find it hard to parse what exactly is the goal here, as the experiments proceed in multiple stages and the presentation makes it hard to fully communicate the bigger picture and what this model is able to do. For e.g. in Sec 4.1 if the automated agent knows the rules of the game, what is it learning? is it learning the transition utility ? Is that nothing but the value function based on feedback i.e. reward?
+  - How exactly is the state transformer doing the following "which was a multidimensional grayscale representation of a pixel map, and transform it into an interpretable representation of objects and events specific to the environment." ? What data does it need to transform the pixel spaces to such an interpretable representation? How is this data generated?
+  - How is the historical memory of such state vectors as a sequence of T states maintained? Does this approach scale for large state spaces? If so, how? - - How is each node in the graph represented?
+  - From all the figures and results, it is still not clear to me how this model adds interpretability?
+  - I find this as a limitation to having to use "a custom simple computer vision algorithm that identified pixel regions on the game field that were distinct from the background, - which algorithm is being used? This process seems fairly manual.
+  - The authors also acknowledge that their experimental methodology might be incomplete, as it was based on the number of games rather than steps. I find this a strong limiting point and needs to be addressed to support the validity of the method I believe, I am curious to hear if the authors believe otherwise.
+
+  - There are many works for Interpretable RL that should be introduced in the related work.
+  - Just using one environment cannot prove the advantages of the proposed method.
+  - What does "playing 100 games" mean? How many environments are used in the experiment?
+  - The colors of the different curves in Figure 3 seem to represent the same algorithm.
+  - What is the definition of U? Why does the new method maximize U instead of Q function?
+
 - goals
   - per/step evaluation
   - "learning stabilty"
