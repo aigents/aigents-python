@@ -37,7 +37,7 @@
 - run ```virtualenv env or python -m venv env```
 - run ```. env/bin/activate``` (or ```. ./env/Scripts/activate``` - if under Windows)
 - run ```pip install -r requirements.txt```
-- run ``python ./breakout_eval2.py``` with specific parameters (specific nnon-default parameters are specified in the body of thi sscript)
+- run ```python ./breakout_eval2.py``` with specific parameters (specific nnon-default parameters are specified in the body of thi sscript)
 
 For instance:
 ```
