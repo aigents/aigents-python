@@ -27,9 +27,11 @@
 
 ### Notebooks with Results
 
-- gym_atari_breakout_experiential1.ipynb - 
-- gym_atari_breakout_experiential2.ipynb - 
-- gym_atari_breakout_experiential3.ipynb - 
+The follwing notebooks keep the results of expeiments performed in command line accordingly to the **Instructions** below, with outputs taken from console outputs andd placed in the notebook for visualization and analysis.     
+
+- ```gym_atari_breakout_experiential1.ipynb``` - Results of Phase 1 (Cursory study, Programmable and Learnable Players)
+- ```gym_atari_breakout_experiential2.ipynb``` - Results of Phase 2 (Cursory study, Learnable Player)
+- ```gym_atari_breakout_experiential3.ipynb``` - Results of Phase 3 (Systematic Study, Learnable Player, 18000 steps/frames limit)  
 
 ## Instructions
 
