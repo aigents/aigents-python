@@ -3,10 +3,6 @@
 ## TODO NEXT
 - REVIEW
   https://paperreview.ai/review?token=wrkiuc22TFMIZkGEwX6u7r62vF1xq85Wl_0AKDwfzVM
-  https://www.google.com/search?q=what+is+episodic+or+instance-based+RL
-  https://pmc.ncbi.nlm.nih.gov/articles/PMC11751224/ (Memory Consolidation - skimmed)
-  https://pmc.ncbi.nlm.nih.gov/articles/PMC5953519/ (Reinforcement learning and episodic memory - TODO)
-    - Episodic memory - define
   https://arxiv.org/pdf/2211.15183 (Continuous Episodic Control - TODO)
 - IMPROVE
   - dimensionatilty reduction
@@ -19,6 +15,7 @@
     - as coefficient codes ... !!!???
     - to object map (Object,Property)
   - learning stability
+    - ! make sure that dU applies to transtions in a sequential epizode, not a states in it! 
     - c - chance to perform random action ("curiosity"), make dependant on "surpriziness" z_t = (s_t - s't)/max(s_t,s't), as c_t = Z * z_t
     - g - extra positive feedback for predictiviness (1 - z_t), as d_t = R * (1-z_t), where R can be considered as an element of x
       OR
@@ -37,47 +34,46 @@
     - Machine learning, deep learning, and statistical methods for big data.
     - Mining heterogeneous data sources, including text, semi-structured, spatio-temporal, streaming, graph, web, and multimedia data
   - Checklist
-    Yes No NA	1.1 A clear description of the mathematical setting, algorithm, and/or model.
+    Yes 1.1 A clear description of the mathematical setting, algorithm, and/or model.
     Yes No NA	1.2 A clear explanation of any assumptions.
     Yes No NA	1.3 An analysis of the complexity (time, space, sample size) of any algorithm.
     Q2. For any theoretical claim, check if you include:
-    Yes No NA	2.1 A clear statement of the claim.
-    Yes No NA	2.2 A complete proof of the claim.
+    NA	2.1 A clear statement of the claim.
+    NA	2.2 A complete proof of the claim.
     Q3. For all datasets used, check if you include:
-    Yes No NA	3.1 The relevant statistics, such as number of examples.
-    Yes No NA	3.2 The details of train/validation/test splits.
-    Yes No NA	3.3 An explanation of any data that were excluded, and all pre-processing step.
-    Yes No NA	3.4 A link to a downloadable version of the dataset or simulation environment.
-    Yes No NA	3.5 For new data collected, a complete description of the data collection process, such as instructions to annotators and methods for quality control.
+    Yes 3.1 The relevant statistics, such as number of examples.
+    Yes 3.2 The details of train/validation/test splits.
+    NA	3.3 An explanation of any data that were excluded, and all pre-processing step.
+    Yes 3.4 A link to a downloadable version of the dataset or simulation environment.
+    NA	3.5 For new data collected, a complete description of the data collection process, such as instructions to annotators and methods for quality control.
     Q4. For all shared code related to this work, check if you include:
-    Yes No NA	4.1 Specification of dependencies.
-    Yes No NA	4.2 Training code.
-    Yes No NA	4.3 Evaluation code.
-    Yes No NA	4.4 (Pre-)trained model(s).
-    Yes No NA	4.5 README file includes table of results accompanied by precise command to run to produce those results.
+    Yes	4.1 Specification of dependencies.
+    Yes 4.2 Training code.
+    Yes 4.3 Evaluation code.
+    NA	4.4 (Pre-)trained model(s).
+    Yes 4.5 README file includes table of results accompanied by precise command to run to produce those results.
     Q5. For all reported experimental results, check if you include:
-    Yes No NA	5.1 The range of hyper-parameters considered, method to select the best hyper-parameter configuration, and specification of all hyper-parameters used to generate results.
-    Yes No NA	5.2 The exact number of training and evaluation runs.
-    Yes No NA	5.3 A clear definition of the specific measure or statistics used to report results.
-    Yes No NA	5.4 A description of results with central tendency (e.g.mean) & variation (e.g. error bars).
-    Yes No NA	5.5 The average runtime for each result, or estimated energy cost.
-    Yes No NA	5.6 A description of the computing infrastructure used.
+    Yes 5.1 The range of hyper-parameters considered, method to select the best hyper-parameter configuration, and specification of all hyper-parameters used to generate results.
+    Yes 5.2 The exact number of training and evaluation runs.
+    Yes 5.3 A clear definition of the specific measure or statistics used to report results.
+    Yes 5.4 A description of results with central tendency (e.g.mean) & variation (e.g. error bars).
+    Yes 5.5 The average runtime for each result, or estimated energy cost.
+    Yes	5.6 A description of the computing infrastructure used.
 
 
 - Summary on review-based improvements
   - improve paper
-    - ! mention process mining
-    - ! refer process mining paper
-    - ! cleaner abstract - what is experiential learning
-    - ! demonstrate and explain interpretability/explainability
+    + mention process mining
+    + cleaner abstract and body - what is experiential learning
+    + cite more interpretable RL papers
+    - ! checklist
+    - ! demonstrate and explain interpretability/explainability  
     - claify the goals of the expreiments
     - clarify what is maximized, definition of U, difference between U and Q in Q-learning
     - provide pseudocode
     - report memory consumption and graph size
     - mean and standard deviation
     - explain the pixel to objects transformation and graph representation
-    - review on interpetable RL
-      - https://www.google.com/search?q=top+papers+on+interpretable+reinforcement+learning
   - new experiments
     - ! different environments
     - ! generalization from pixels
