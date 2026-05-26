@@ -1,9 +1,6 @@
 # State-based History-aware Artificial Reinforcement Intelligence Kernel (Sharik) 1.2 - TODO
 
 ## TODO NEXT
-- REVIEW
-  https://paperreview.ai/review?token=wrkiuc22TFMIZkGEwX6u7r62vF1xq85Wl_0AKDwfzVM
-  https://arxiv.org/pdf/2211.15183 (Continuous Episodic Control - TODO)
 - IMPROVE
   - dimensionatilty reduction
     - pixel map C(X,Y,RGB) => grayscale c or JPEG-style!?
@@ -22,51 +19,9 @@
       - the same for "discoverinness"?
     - e - extra negative feedback for energy consumption
 
-- ICDM sumbission
-  - http://icdm2026.neu.edu.cn/ 10 pages
-    - Paper    June 6, 2026
-      - https://anonymous.4open.science/dashboard
-    - Accept   August 16, 2026
-    - Camera   September 9, 2026
-    - Conf.    November 12-15, 2026
-
-  - Topics
-    - Machine learning, deep learning, and statistical methods for big data.
-    - Mining heterogeneous data sources, including text, semi-structured, spatio-temporal, streaming, graph, web, and multimedia data
-  - Checklist
-    Yes 1.1 A clear description of the mathematical setting, algorithm, and/or model.
-    Yes No NA	1.2 A clear explanation of any assumptions.
-    Yes No NA	1.3 An analysis of the complexity (time, space, sample size) of any algorithm.
-    Q2. For any theoretical claim, check if you include:
-    NA	2.1 A clear statement of the claim.
-    NA	2.2 A complete proof of the claim.
-    Q3. For all datasets used, check if you include:
-    Yes 3.1 The relevant statistics, such as number of examples.
-    Yes 3.2 The details of train/validation/test splits.
-    NA	3.3 An explanation of any data that were excluded, and all pre-processing step.
-    Yes 3.4 A link to a downloadable version of the dataset or simulation environment.
-    NA	3.5 For new data collected, a complete description of the data collection process, such as instructions to annotators and methods for quality control.
-    Q4. For all shared code related to this work, check if you include:
-    Yes	4.1 Specification of dependencies.
-    Yes 4.2 Training code.
-    Yes 4.3 Evaluation code.
-    NA	4.4 (Pre-)trained model(s).
-    Yes 4.5 README file includes table of results accompanied by precise command to run to produce those results.
-    Q5. For all reported experimental results, check if you include:
-    Yes 5.1 The range of hyper-parameters considered, method to select the best hyper-parameter configuration, and specification of all hyper-parameters used to generate results.
-    Yes 5.2 The exact number of training and evaluation runs.
-    Yes 5.3 A clear definition of the specific measure or statistics used to report results.
-    Yes 5.4 A description of results with central tendency (e.g.mean) & variation (e.g. error bars).
-    Yes 5.5 The average runtime for each result, or estimated energy cost.
-    Yes	5.6 A description of the computing infrastructure used.
-
 
 - Summary on review-based improvements
   - improve paper
-    + mention process mining
-    + cleaner abstract and body - what is experiential learning
-    + cite more interpretable RL papers
-    - ! checklist
     - ! demonstrate and explain interpretability/explainability  
     - claify the goals of the expreiments
     - clarify what is maximized, definition of U, difference between U and Q in Q-learning
