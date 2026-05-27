@@ -2,6 +2,17 @@
 
 ## TODO NEXT
 - IMPROVE
+  - learning stability
+    - get rid of cosine_similarity with euclidean_similarity
+      - check "cec" measure
+      - make it configurable
+      - run unit test
+      - re-run unit test with new measure
+    - c - chance to perform random action ("curiosity"), make dependant on "surpriziness" z_t = (s_t - s't)/max(s_t,s't), as c_t = Z * z_t
+    - g - extra positive feedback for predictiviness (1 - z_t), as d_t = R * (1-z_t), where R can be considered as an element of x
+      OR
+      - the same for "discoverinness"?
+    - e - extra negative feedback for energy consumption
   - dimensionatilty reduction
     - pixel map C(X,Y,RGB) => grayscale c or JPEG-style!?
     - grayscale G(X,Y) => spots "spot transformation" ... !!!???
@@ -11,13 +22,6 @@
       - cluster (G,X,Y) till they can be clustered
     - as coefficient codes ... !!!???
     - to object map (Object,Property)
-  - learning stability
-    - ! make sure that dU applies to transtions in a sequential epizode, not a states in it! 
-    - c - chance to perform random action ("curiosity"), make dependant on "surpriziness" z_t = (s_t - s't)/max(s_t,s't), as c_t = Z * z_t
-    - g - extra positive feedback for predictiviness (1 - z_t), as d_t = R * (1-z_t), where R can be considered as an element of x
-      OR
-      - the same for "discoverinness"?
-    - e - extra negative feedback for energy consumption
 
 
 - Summary on review-based improvements

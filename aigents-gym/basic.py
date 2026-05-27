@@ -43,7 +43,101 @@ def get_avg_pos(a,t):
     return np.mean(indexes) if len(indexes) > 0 else None
 
 def cosine_similarity(a,b):
-    return np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b))
+    return np.dot(a, b)/(np.linalg.norm(a) * np.linalg.norm(b))
+
+
+def max_corner_distance(M):
+    """
+    Compute the maximum Euclidean distance (corner-to-corner) for a space
+    where each dimension i is bounded in [0, M_i].
+    Parameters:
+        M : array-like
+            Maximum values for each dimension.
+    Returns:
+        float : Maximum Euclidean distance.
+    """
+    M = np.array(M)
+    return np.sqrt(np.sum(M**2))
+
+assert(round(max_corner_distance(([10,10])))==14)
+
+
+def max_corner_distance_min_max(minmax):
+    """
+    Compute the maximum Euclidean distance (corner-to-corner) for a space
+    where each dimension i is bounded in [Min_i, Max_i].
+    Parameters:
+        minmax : array-like
+            Min and Max values (lists) for each dimension.
+    Returns:
+        float : Maximum Euclidean distance.
+    """
+    squared_sum = 0.0
+    for mi, ma in minmax:
+        assert(mi < ma)
+        diff = ma - mi
+        squared_sum += diff * diff
+    return np.sqrt(squared_sum)
+
+assert(round(max_corner_distance_min_max(([0,10],[0,10])))==14)
+assert(round(max_corner_distance_min_max(([-10,10],[-10,10])))==28)
+    
+
+def norm_euclidean_distance(a,b,D_max):
+    """
+    Euclidean distance between two vectors noralized by the longest vector, assuming both vectores are in the same  
+    """
+    a = np.array(a)
+    b = np.array(b)
+    ned = np.linalg.norm(a-b) / D_max
+    assert(ned >= 0 and ned <=1.0) # to make sure it is in range
+    return ned
+
+
+def norm_euclidean_simialarity(a,b,D_max):
+    return 1 - norm_euclidean_distance(a,b,D_max)
+
+
+# this illustrates that cosine similarity is not usable completely
+assert(float(round(cosine_similarity((10,10),(10,10)),2))==1.0)
+assert(float(round(cosine_similarity((10,10),(10,9 )),2))==1.0)
+assert(float(round(cosine_similarity((10,10),(10,5 )),2))==0.95)
+assert(float(round(cosine_similarity((10,10),( 9,9 )),2))==1.0) # problem!
+assert(float(round(cosine_similarity((10,10),(10,0 )),2))==0.71)
+assert(np.isnan(float(round(cosine_similarity((10,10),( 0,0 )),2)))) # problem!
+assert(float(round(cosine_similarity((10),(1)),2))==1.0) # problem!
+assert(float(round(cosine_similarity((10,10),(1,1)),2)==1.0)) # problem!
+assert(float(round(cosine_similarity((10,10,0,0,0),(1,1,0,0,0)),2))==1.0) # problem!
+assert(float(round(cosine_similarity((10,10,5,5,5),(1,1,5,5,5)),2))==0.65)
+
+assert(float(round(norm_euclidean_simialarity((10,10),(10,10),max_corner_distance((10,10))),2))==1.0)
+assert(float(round(norm_euclidean_simialarity((10,10),(10,9),max_corner_distance((10,10))),2))==0.93)
+assert(float(round(norm_euclidean_simialarity((10,10),(10,5),max_corner_distance((10,10))),2))==0.65)
+assert(round(norm_euclidean_simialarity((10,10),( 9,9 ),max_corner_distance((10,10))),2)==0.9)
+assert(round(norm_euclidean_simialarity((10,10),(10,0 ),max_corner_distance((10,10))),2)==0.29)
+assert(round(norm_euclidean_simialarity((10,10),( 0,0 ),max_corner_distance((10,10))),2)==0.0)
+assert(round(norm_euclidean_simialarity((10),(1),max_corner_distance((10,))),2)==0.1)
+assert(float(round(norm_euclidean_simialarity((10,10),(1,1),max_corner_distance((10,10))),2))==0.1)
+assert(float(round(norm_euclidean_simialarity((10,10,0,0,0),(1,1,0,0,0),max_corner_distance((10,10,10,10,10))),2))==0.43)
+assert(float(round(norm_euclidean_simialarity((10,10,5,5,5),(1,1,5,5,5),max_corner_distance((10,10,10,10,10))),2))==0.43)
+
+
+def dimensions_init(N):
+    return tuple([None] * 2 for _ in range(N))
+
+def measure_dimensions(min_max,state):
+    for i, var in enumerate(state):
+        mm = min_max[i]
+        if mm[0] is None or mm[0] > var: # min
+            mm[0] = var
+        if mm[1] is None or mm[1] < var: # max
+            mm[1] = var
+
+_space_min_max = dimensions_init(2)
+measure_dimensions(_space_min_max,(10,10))
+measure_dimensions(_space_min_max,(1,100))
+assert(str(_space_min_max)=="([1, 10], [10, 100])")
+
 
 def model_set_context_size(model,context_size=1):
     if context_size > 1:
@@ -58,8 +152,11 @@ def model_new(context_size=1):
     """
     games: games count
     steps: steps count
-    states: map states to (utility,count,transtions) triple
-        transitions: map states pair to (utility,count)
+    states: maps states to (utility,count,transtions) triple
+        transitions: maps states pair to (utility,count)
+    contexts: maps sizes of contexts (state series of size from 2 and more) respective contexts
+        contexts: states to (utility,count,transtions) triple
+            transitions: maps ... TODO
     """
     model = {'steps':0, 'games':0, 'states':{}}
     model_set_context_size(model,context_size=context_size)
@@ -80,9 +177,10 @@ def model_write_file(model_name, model):
         pickle.dump(model, f)
 
 #TODO optional exponentional reward decay OR remove if not used? 
-def model_add_states(model,states,global_feeddback):
+def model_add_states(model,states,global_feedback):
     """
-    Add emotionally valuable episode of N of states with some global feeddback
+    Add potentially emotionally valuable episode of N of states with some global feeddback.
+    Not used.
     """
     model['steps'] += len(states)
     model_states = model['states']
@@ -90,16 +188,16 @@ def model_add_states(model,states,global_feeddback):
     for state in states:
         if state in model_states:
             (utility, count, transitions) = model_states[state]
-            model_states[state] = (utility + global_feeddback, count + 1, transitions)
+            model_states[state] = (utility + global_feedback, count + 1, transitions)
         else:
-            model_states[state] = (global_feeddback, 1, {})
+            model_states[state] = (global_feedback, 1, {})
         if not previous is None:
             (utility, count, transitions) = model_states[previous]
             if state in transitions:
                 (transition_utility, transition_count) = transitions[state]
-                transitions[state] = (transition_utility + global_feeddback, transition_count + 1)
+                transitions[state] = (transition_utility + global_feedback, transition_count + 1)
             else:
-                transitions[state] = (global_feeddback, 1)
+                transitions[state] = (global_feedback, 1)
             model_states[previous] = (utility, count, transitions)
         previous = state
     return model
@@ -110,38 +208,45 @@ assert(str(model_add_states(model_new(),[(0,0),(0,1),(0,0),(0,1)],0))=="{'steps'
 assert(str(model_add_states(model_new(),[(0,0),(0,1),(0,0),(0,1)],1))=="{'steps': 4, 'games': 0, 'states': {(0, 0): (2, 2, {(0, 1): (2, 2)}), (0, 1): (2, 2, {(0, 0): (1, 1)})}}")
 
 #TODO optional exponentional reward decay?
-def model_add_state_transitions(model_states,previous,state,global_feeddback):
+def model_add_state_transitions(model_states,previous,state,global_feedback):
+    """
+    Add potentially emotionally valuable single state and its transition to another state with some global feeddback.
+    """
     if state in model_states:
         (utility, count, transitions) = model_states[state]
-        model_states[state] = (utility + global_feeddback, count + 1, transitions)
+        model_states[state] = (utility + global_feedback, count + 1, transitions)
     else:
-        model_states[state] = (global_feeddback, 1, {})
+        model_states[state] = (global_feedback, 1, {})
     if not previous is None:
         (utility, count, transitions) = model_states[previous]
         if state in transitions:
             (transition_utility, transition_count) = transitions[state]
-            transitions[state] = (transition_utility + global_feeddback, transition_count + 1)
+            transitions[state] = (transition_utility + global_feedback, transition_count + 1)
         else:
-            transitions[state] = (global_feeddback, 1)
+            transitions[state] = (global_feedback, 1)
         model_states[previous] = (utility, count, transitions)
 
-def model_add_context_transitions(model_contexts,context,state,global_feeddback):
+def model_add_context_transitions(model_contexts,context,state,global_feedback):
+    """
+    Add potentially emotionally valuable series of states (context) and its transition to a single state with some global feeddback.
+    """
     if context in model_contexts:
         (utility, count, transitions) = model_contexts[context]
-        utility += global_feeddback
+        utility += global_feedback
         count += 1
     else:
-        (utility, count, transitions) = (global_feeddback, 1, {})
+        (utility, count, transitions) = (global_feedback, 1, {})
     if state in transitions:
         (transition_utility, transition_count) = transitions[state]
-        transitions[state] = (transition_utility + global_feeddback, transition_count + 1)
+        transitions[state] = (transition_utility + global_feedback, transition_count + 1)
     else:
-        transitions[state] = (global_feeddback, 1)
+        transitions[state] = (global_feedback, 1)
     model_contexts[context] = (utility, count, transitions)
 
-def model_add_states_contexts(model,states,global_feeddback):
+def model_add_states_contexts(model,states,global_feedback):
     """
-    Add emotionally valuable episode of N of states with some global feeddback
+    Add emotionally valuable episode of N of states with some global feeddback as transitions from state to state and
+    from series of states (context) to single state. 
     """
     model['steps'] += len(states)
     model_states = model['states']
@@ -149,14 +254,14 @@ def model_add_states_contexts(model,states,global_feeddback):
     model_contexts_count = len(model_contexts) if not model_contexts is None else 0
     previous = None
     for index, state in enumerate(states):
-        model_add_state_transitions(model_states,previous,state,global_feeddback)
+        model_add_state_transitions(model_states,previous,state,global_feedback)
         previous = state
         for context_index in range(model_contexts_count): # from 2 and up, [0,1,2,...]=>[2,3,4,...]
             context_size = context_index + 2
             if index + 1 > context_size: #TODO simplify
                 model_context = model_contexts[context_size]
-                context = sum(states[index-context_size:index],())
-                model_add_context_transitions(model_context,context,state,global_feeddback)
+                context = sum(states[index-context_size:index],()) # concatentate series of states into continious state for sompler matching
+                model_add_context_transitions(model_context,context,state,global_feedback)
     return model
 
 assert(str(model_add_states_contexts(model_new(),[],0))=="{'steps': 0, 'games': 0, 'states': {}}")
