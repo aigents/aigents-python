@@ -4,15 +4,21 @@
 - IMPROVE
   - learning stability
     - get rid of cosine_similarity with euclidean_similarity
-      - check "cec" measure
       - make it configurable
       - run unit test
-      - re-run unit test with new measure
+      - re-run unit test with new measures
+        - 1-d/max
+        - 1-dnorm (distance in normalized space)
+        - cos with one-hot encoding of x and y ??? 
     - c - chance to perform random action ("curiosity"), make dependant on "surpriziness" z_t = (s_t - s't)/max(s_t,s't), as c_t = Z * z_t
     - g - extra positive feedback for predictiviness (1 - z_t), as d_t = R * (1-z_t), where R can be considered as an element of x
       OR
       - the same for "discoverinness"?
     - e - extra negative feedback for energy consumption
+  - expreimental setting like in Mnih?
+    - 100 epochs X epoch corresponds to 50000 minibatch weight updates or 30 minutes = 108,000 frames (averge over games??? is 168)
+    - 50 epochs = 5,400,000 frames (maximum possible score of 225)
+    - frameskip k = 4 
   - dimensionatilty reduction
     - pixel map C(X,Y,RGB) => grayscale c or JPEG-style!?
     - grayscale G(X,Y) => spots "spot transformation" ... !!!???

@@ -20,6 +20,7 @@ parser.add_argument('-lm','--learn_mode', type=int, default=2, help='Learn mode 
 parser.add_argument('-cs','--context_size', type=int, default=1, help='Context size')
 parser.add_argument('-sc','--state_count', type=int, default=2, help='State count threshold')
 parser.add_argument('-ss','--state_similarity', type=float, default=0.9, help='State similarity threshold')
+parser.add_argument('-sm','--similarity_method', type=str, default="cos", help='State similarity method ("cos", "1-d/max", "exp(-d)", "1/(1+d)")')
 parser.add_argument('-tu','--transition_utility', type=int, default=None, help='Transition utility thereshold')
 parser.add_argument('-tc','--transition_count', type=int, default=1, help='Transition count threshold')
 

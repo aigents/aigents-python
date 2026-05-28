@@ -2,6 +2,9 @@ import os, sys
 import numpy as np
 import pickle
 import random
+import math
+
+# Util
 
 INT_NONE = -sys.maxsize - 1
 
@@ -42,24 +45,29 @@ def get_avg_pos(a,t):
     indexes = np.where(a > t)[0]
     return np.mean(indexes) if len(indexes) > 0 else None
 
+
+# Basic
+
 def cosine_similarity(a,b):
     return np.dot(a, b)/(np.linalg.norm(a) * np.linalg.norm(b))
 
 
-def max_corner_distance(M):
+def max_corner_distance(dims):
     """
     Compute the maximum Euclidean distance (corner-to-corner) for a space
     where each dimension i is bounded in [0, M_i].
     Parameters:
-        M : array-like
+        dims : array-like
             Maximum values for each dimension.
     Returns:
         float : Maximum Euclidean distance.
     """
-    M = np.array(M)
-    return np.sqrt(np.sum(M**2))
+    dims = np.array(dims)
+    return np.sqrt(np.sum(dims**2))
 
 assert(round(max_corner_distance(([10,10])))==14)
+# state = (previous_action,)+(1 if reward > 0 else 0,1 if reward < 0 else 0)+(racket_col, ball_col)
+assert(round(math.ceil(max_corner_distance([3,1,1,178,178])))==252)
 
 
 def max_corner_distance_min_max(minmax):
@@ -83,43 +91,86 @@ assert(round(max_corner_distance_min_max(([0,10],[0,10])))==14)
 assert(round(max_corner_distance_min_max(([-10,10],[-10,10])))==28)
     
 
-def norm_euclidean_distance(a,b,D_max):
+def norm_euclidean_distance(a,b,dims,dist_max):
     """
     Euclidean distance between two vectors noralized by the longest vector, assuming both vectores are in the same  
     """
-    a = np.array(a)
-    b = np.array(b)
-    ned = np.linalg.norm(a-b) / D_max
-    assert(ned >= 0 and ned <=1.0) # to make sure it is in range
-    return ned
+    #d = np.linalg.norm(np.array(a) - np.array(b)) / dist_max
+    c = [(ai-bi if (ai !=INT_NONE and bi != INT_NONE) else di) for ai, bi, di in zip(a,b,dims)]
+    if dist_max is None:
+        dist_max = max_corner_distance(dims)
+    d = np.linalg.norm(c) / dist_max
+    if not (d >= 0 and d <=1.0):
+        print(a)
+        print(b)
+        print(c)
+        print(d,np.linalg.norm(c),dist_max)
+    assert(d >= 0 and d <=1.0) # to make sure it is in range
+    return d
 
 
-def norm_euclidean_simialarity(a,b,D_max):
-    return 1 - norm_euclidean_distance(a,b,D_max)
+def norm_similarity(a,b,method='1/(1+d)',dims=None,dist_max=None):
+    if method == 'cos':
+        return cosine_similarity(a,b) 
+    if method == '1-d/max': 
+        #d = np.linalg.norm(np.array(a) - np.array(b))
+        #return max(0.0, 1.0 - d / dist_max)
+        d = 1 - norm_euclidean_distance(a,b,dims,dist_max) # do this instead of just d for interrnal assertion purposes
+        #print(d)
+        return d
+    d = np.linalg.norm(np.array(a) - np.array(b))
+    if method == 'exp(-d)':
+        return np.exp(-d)
+    else: #if method == '1/(1+d)':
+        #print('---',d,1.0 / (1.0 + d))
+        return 1.0 / (1.0 + d)
 
 
-# this illustrates that cosine similarity is not usable completely
-assert(float(round(cosine_similarity((10,10),(10,10)),2))==1.0)
-assert(float(round(cosine_similarity((10,10),(10,9 )),2))==1.0)
-assert(float(round(cosine_similarity((10,10),(10,5 )),2))==0.95)
-assert(float(round(cosine_similarity((10,10),( 9,9 )),2))==1.0) # problem!
-assert(float(round(cosine_similarity((10,10),(10,0 )),2))==0.71)
-assert(np.isnan(float(round(cosine_similarity((10,10),( 0,0 )),2)))) # problem!
-assert(float(round(cosine_similarity((10),(1)),2))==1.0) # problem!
-assert(float(round(cosine_similarity((10,10),(1,1)),2)==1.0)) # problem!
-assert(float(round(cosine_similarity((10,10,0,0,0),(1,1,0,0,0)),2))==1.0) # problem!
-assert(float(round(cosine_similarity((10,10,5,5,5),(1,1,5,5,5)),2))==0.65)
+# 'cos': The worst - this illustrates that cosine similarity is not usable completely
+# it does not distinguish (10,10) and (1,1)
+assert(float(round(norm_similarity((10,10),(10,10),'cos'),2))==1.0)
+assert(float(round(norm_similarity((10,10),(10,9 ),'cos'),2))==1.0)
+assert(float(round(norm_similarity((10,10),(10,5 ),'cos'),2))==0.95)
+assert(float(round(norm_similarity((10,10),( 9,9 ),'cos'),2))==1.0) # problem!
+assert(float(round(norm_similarity((10,10),(10,0 ),'cos'),2))==0.71)
+#assert(np.isnan(float(round(norm_similarity((10,10),( 0,0 ),'cos'),2)))) # problem (commented out to suppress warning)!
+assert(float(round(norm_similarity((10,),(1,),'cos'),2))==1.0) # problem!
+assert(float(round(norm_similarity((10,10),(1,1),'cos'),2)==1.0)) # problem!
+assert(float(round(norm_similarity((10,10,0,0,0),(1,1,0,0,0),'cos'),2))==1.0) # problem!
+assert(float(round(norm_similarity((10,10,5,5,5),(1,1,5,5,5),'cos'),2))==0.65)
 
-assert(float(round(norm_euclidean_simialarity((10,10),(10,10),max_corner_distance((10,10))),2))==1.0)
-assert(float(round(norm_euclidean_simialarity((10,10),(10,9),max_corner_distance((10,10))),2))==0.93)
-assert(float(round(norm_euclidean_simialarity((10,10),(10,5),max_corner_distance((10,10))),2))==0.65)
-assert(round(norm_euclidean_simialarity((10,10),( 9,9 ),max_corner_distance((10,10))),2)==0.9)
-assert(round(norm_euclidean_simialarity((10,10),(10,0 ),max_corner_distance((10,10))),2)==0.29)
-assert(round(norm_euclidean_simialarity((10,10),( 0,0 ),max_corner_distance((10,10))),2)==0.0)
-assert(round(norm_euclidean_simialarity((10),(1),max_corner_distance((10,))),2)==0.1)
-assert(float(round(norm_euclidean_simialarity((10,10),(1,1),max_corner_distance((10,10))),2))==0.1)
-assert(float(round(norm_euclidean_simialarity((10,10,0,0,0),(1,1,0,0,0),max_corner_distance((10,10,10,10,10))),2))==0.43)
-assert(float(round(norm_euclidean_simialarity((10,10,5,5,5),(1,1,5,5,5),max_corner_distance((10,10,10,10,10))),2))==0.43)
+# '1/(1+d)': Not than good?
+assert(float(round(norm_similarity((10,10),(10,10)),2))==1.0)
+assert(float(round(norm_similarity((10,10),(10,9)),2))==0.5) # not good...
+assert(float(round(norm_similarity((10,10),(10,5)),2))==0.17)
+assert(float(round(norm_similarity((10,10),( 9,9 )),2))==0.41)
+assert(float(round(norm_similarity((10,10),(10,0 )),2))==0.09)
+assert(float(round(norm_similarity((10,10),( 0,0 )),2))==0.07)
+assert(float(round(norm_similarity((10,),(1,)),2))==0.1)
+assert(float(round(norm_similarity((10,10),(1,1)),2))==0.07)
+assert(float(round(norm_similarity((10,10,0,0,0),(1,1,0,0,0)),2))==0.07)
+assert(float(round(norm_similarity((10,10,5,5,5),(1,1,5,5,5)),2))==0.07)
+assert(round(norm_similarity((10,10,5,5,5),(10,10,5,5,5)),2)==1.0)
+assert(round(norm_similarity((10,10,5,5,5),(10,10,5,5,4)),2)==0.5) # not good...
+
+# '1-d/max': The best!?
+assert(float(round(norm_similarity((10,10),(10,10),'1-d/max',(10,10)),2))==1.0)
+assert(float(round(norm_similarity((10,10),(10,9),'1-d/max',(10,10)),2))==0.93)
+assert(float(round(norm_similarity((10,10),(10,5),'1-d/max',(10,10)),2))==0.65)
+assert(round(norm_similarity((10,10),( 9,9 ),'1-d/max',(10,10)),2)==0.9)
+assert(round(norm_similarity((10,10),(10,0 ),'1-d/max',(10,10)),2)==0.29)
+assert(round(norm_similarity((10,10),( 0,0 ),'1-d/max',(10,10)),2)==0.0)
+assert(round(norm_similarity((10,),(1,),'1-d/max',(10,)),2)==0.1)
+assert(float(round(norm_similarity((10,10),(1,1),'1-d/max',(10,10)),2))==0.1)
+assert(round(norm_similarity((10,10,0,0,0),(1,1,0,0,0),'1-d/max',   (10,10,10,10,10)),2)==0.43)
+assert(round(norm_similarity((10,10,10,10,10),(1,1,1,1,1),'1-d/max',(10,10,10,10,10)),2)==0.1)
+assert(round(norm_similarity((10,10,5,5,5),(10,10,5,5,5),'1-d/max', (10,10,10,10,10)),2)==1.0)
+assert(round(norm_similarity((10,10,5,5,5),(1,1,5,5,5),'1-d/max',   (10,10,10,10,10)),2)==0.43)
+assert(round(norm_similarity((10,10,5,5,5),(10,10,5,5,5),'1-d/max', (10,10,10,10,10)),2)==1.0)
+assert(round(norm_similarity((10,10,5,5,5),(10,10,5,5,4),'1-d/max', (10,10,10,10,10)),2)==0.96) # good!
+assert(round(norm_similarity([10,10,10],[10,10,10],'1-d/max',[10,10,10]),2)==1.0)
+assert(round(norm_similarity([10,10,INT_NONE],[10,10,10],'1-d/max',[10,10,10]),2)==0.42)
+assert(round(norm_similarity([10,INT_NONE,INT_NONE],[10,10,10],'1-d/max',[10,10,10]),2)==0.18)
 
 
 def dimensions_init(N):
@@ -138,6 +189,7 @@ measure_dimensions(_space_min_max,(10,10))
 measure_dimensions(_space_min_max,(1,100))
 assert(str(_space_min_max)=="([1, 10], [10, 100])")
 
+# Model
 
 def model_set_context_size(model,context_size=1):
     if context_size > 1:
@@ -274,13 +326,13 @@ assert(str(model_add_states_contexts(model_new(context_size=2),[(1,1),(2,2),(3,3
 assert(str(model_add_states_contexts(model_new(context_size=2),[(1,1),(2,2),(1,1),(2,2),(3,3)],1)['contexts'])=="{2: {(1, 1, 2, 2): (2, 2, {(1, 1): (1, 1), (3, 3): (1, 1)}), (2, 2, 1, 1): (1, 1, {(2, 2): (1, 1)})}}")
 assert(str(model_add_states_contexts(model_new(context_size=3),[(1,1),(2,2),(1,1),(2,2),(3,3)],1)['contexts'])=="{2: {(1, 1, 2, 2): (2, 2, {(1, 1): (1, 1), (3, 3): (1, 1)}), (2, 2, 1, 1): (1, 1, {(2, 2): (1, 1)})}, 3: {(1, 1, 2, 2, 1, 1): (1, 1, {(2, 2): (1, 1)}), (2, 2, 1, 1, 2, 2): (1, 1, {(3, 3): (1, 1)})}}")
 
-def find_similar(states,state,state_count_threshold,state_similarity_threshold):
+def find_similar(states,state,state_count_threshold,state_similarity_threshold,sim_method,dims,max_dist):
     max_sim = 0
     bests = []
     for s, utility_count in states.items():
         if utility_count[1] < state_count_threshold: # disregard rare evidence
             continue
-        sim = cosine_similarity(s,state)
+        sim = norm_similarity(s,state,sim_method,dims,max_dist)
         if sim < state_similarity_threshold:
             continue
         if max_sim < sim:
