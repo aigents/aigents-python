@@ -4,11 +4,14 @@
 - IMPROVE
   - learning stability
     - get rid of cosine_similarity with euclidean_similarity
-      - make it configurable
-      - run unit test
-      - re-run unit test with new measures
+      + re-run unit test with new measures (sim_tests)
+        - 1-d/max - 0.7 is the best
+        - cos - too many games stuck at 18000
+      * re-run with new frame-based experimental setup (sim_test2))
         - 1-d/max
-        - 1-dnorm (distance in normalized space)
+        - cos
+        - exp(-d)
+        - 1/(1+d)
         - cos with one-hot encoding of x and y ??? 
     - c - chance to perform random action ("curiosity"), make dependant on "surpriziness" z_t = (s_t - s't)/max(s_t,s't), as c_t = Z * z_t
     - g - extra positive feedback for predictiviness (1 - z_t), as d_t = R * (1-z_t), where R can be considered as an element of x

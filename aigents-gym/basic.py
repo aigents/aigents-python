@@ -62,8 +62,8 @@ def max_corner_distance(dims):
     Returns:
         float : Maximum Euclidean distance.
     """
-    dims = np.array(dims)
-    return np.sqrt(np.sum(dims**2))
+    #return np.sqrt(np.sum(np.array(dims)**2))
+    return np.linalg.norm(dims)
 
 assert(round(max_corner_distance(([10,10])))==14)
 # state = (previous_action,)+(1 if reward > 0 else 0,1 if reward < 0 else 0)+(racket_col, ball_col)
@@ -85,6 +85,7 @@ def max_corner_distance_min_max(minmax):
         assert(mi < ma)
         diff = ma - mi
         squared_sum += diff * diff
+    #TODO use np.linalg.norm for sqrt(sum(x**2))
     return np.sqrt(squared_sum)
 
 assert(round(max_corner_distance_min_max(([0,10],[0,10])))==14)
@@ -112,12 +113,21 @@ def norm_euclidean_distance(a,b,dims,dist_max):
 def norm_similarity(a,b,method='1/(1+d)',dims=None,dist_max=None):
     if method == 'cos':
         return cosine_similarity(a,b) 
+    if method == '1-dnorm': # equivalent to '1-d/max'
+        a = [(ai / di if ai !=INT_NONE else ai) for ai, di in zip(a,dims)]
+        b = [(bi / di if bi !=INT_NONE else bi) for bi, di in zip(b,dims)]
+        c = [(ai-bi if (ai !=INT_NONE and bi != INT_NONE) else 1) for ai, bi in zip(a,b)]
+        d = np.linalg.norm(c) / math.sqrt(len(dims)) # sqrt(sum(1**2))
+        if not (d >= 0 and d <=1.0):
+            print(a)
+            print(b)
+            print(c)
+            print(d)
+        assert(d >= 0 and d <=1.0) # to make sure it is in range
+        return 1 - d
     if method == '1-d/max': 
-        #d = np.linalg.norm(np.array(a) - np.array(b))
-        #return max(0.0, 1.0 - d / dist_max)
-        d = 1 - norm_euclidean_distance(a,b,dims,dist_max) # do this instead of just d for interrnal assertion purposes
-        #print(d)
-        return d
+        #return max(0.0, 1.0 - np.linalg.norm(np.array(a) - np.array(b)) / dist_max)
+        return 1 - norm_euclidean_distance(a,b,dims,dist_max) # do this instead of just d for internal assertion purposes
     d = np.linalg.norm(np.array(a) - np.array(b))
     if method == 'exp(-d)':
         return np.exp(-d)
