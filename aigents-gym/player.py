@@ -431,9 +431,10 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
                 found = contexts[context]
                 match = 'exact3'
             except KeyError:
-                found = find_similarNov32025_with_rand(contexts,context, self.state_count_threshold, self.state_similarity_threshold,
-                    self.similarity_method, self.similarity_dims[2], self.similarity_max_dist[2])
-                match = 'similar3'
+                if self.state_similarity_threshold < 1.0:
+                    found = find_similarNov32025_with_rand(contexts,context, self.state_count_threshold, self.state_similarity_threshold,
+                        self.similarity_method, self.similarity_dims[2], self.similarity_max_dist[2])
+                    match = 'similar3'
         if found is None and self.context_size > 1 and len(self.states) > 1: #TODO make other than 2
             context = sum(self.states[-2:],())
             contexts = self.model['contexts'][2] #TODO make other than 2
@@ -441,8 +442,9 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
                 found = contexts[context]
                 match = 'exact2'
             except KeyError:
-                found = find_similarNov32025_with_rand(contexts,context, self.state_count_threshold, self.state_similarity_threshold,
-                    self.similarity_method, self.similarity_dims[1], self.similarity_max_dist[1])
+                if self.state_similarity_threshold < 1.0:
+                    found = find_similarNov32025_with_rand(contexts,context, self.state_count_threshold, self.state_similarity_threshold,
+                        self.similarity_method, self.similarity_dims[1], self.similarity_max_dist[1])
                 match = 'similar2'
         if found is None:
             states = self.model['states']
@@ -450,8 +452,9 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
                 found = states[state]
                 match = 'exact1'
             except KeyError:
-                found = find_similarNov32025_with_rand(states,state, self.state_count_threshold, self.state_similarity_threshold,
-                    self.similarity_method, self.similarity_dims[0], self.similarity_max_dist[0])
+                if self.state_similarity_threshold < 1.0:
+                    found = find_similarNov32025_with_rand(states,state, self.state_count_threshold, self.state_similarity_threshold,
+                        self.similarity_method, self.similarity_dims[0], self.similarity_max_dist[0])
                 match = 'similar1'
 
         #if found:
