@@ -316,7 +316,7 @@ class BreakoutModelDriven(BreakoutProgrammable): # State-based History-aware Art
             except KeyError:
                 if self.state_similarity_threshold < 1.0:
                     found = find_similar(contexts,context, self.state_count_threshold, self.state_similarity_threshold,
-                        self.similarity_method, self.similarity_dims, self.similarity_max_dist)
+                        self.similarity_method, self.similarity_dims[1], self.similarity_max_dist[1])
                 match = 'similar2'
         if found is None:
             states = self.model['states']
@@ -326,7 +326,7 @@ class BreakoutModelDriven(BreakoutProgrammable): # State-based History-aware Art
             except KeyError:
                 if self.state_similarity_threshold < 1.0:
                     found = find_similar(states,state, self.state_count_threshold, self.state_similarity_threshold,
-                        self.similarity_method, self.similarity_dims, self.similarity_max_dist)
+                        self.similarity_method, self.similarity_dims[0], self.similarity_max_dist[0])
                 match = 'similar1'
 
         if not found is None:
@@ -419,8 +419,8 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
                 self.states.clear() # clear the states including the rewarded one to start over with new state and new action on it
             self.states.append(state)
 
-        self.similarity_dims = [3,1,1,178,178] # HACK - detect this on-the fly or from the model!!!
-        self.similarity_max_dist = max_corner_distance(self.similarity_dims)
+        self.similarity_dims = [[3,1,1,178,178],[3,1,1,178,178]*2,[3,1,1,178,178]*3] # HACK - detect this on-the fly or from the model!!!
+        self.similarity_max_dist = [max_corner_distance(d) for d in self.similarity_dims]
 
         found = None
         #TODO compact this code with cs going down from self.context_size to 1
@@ -432,7 +432,7 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
                 match = 'exact3'
             except KeyError:
                 found = find_similarNov32025_with_rand(contexts,context, self.state_count_threshold, self.state_similarity_threshold,
-                    self.similarity_method, self.similarity_dims, self.similarity_max_dist)
+                    self.similarity_method, self.similarity_dims[2], self.similarity_max_dist[2])
                 match = 'similar3'
         if found is None and self.context_size > 1 and len(self.states) > 1: #TODO make other than 2
             context = sum(self.states[-2:],())
@@ -442,7 +442,7 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
                 match = 'exact2'
             except KeyError:
                 found = find_similarNov32025_with_rand(contexts,context, self.state_count_threshold, self.state_similarity_threshold,
-                    self.similarity_method, self.similarity_dims, self.similarity_max_dist)
+                    self.similarity_method, self.similarity_dims[1], self.similarity_max_dist[1])
                 match = 'similar2'
         if found is None:
             states = self.model['states']
@@ -451,7 +451,7 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
                 match = 'exact1'
             except KeyError:
                 found = find_similarNov32025_with_rand(states,state, self.state_count_threshold, self.state_similarity_threshold,
-                    self.similarity_method, self.similarity_dims, self.similarity_max_dist)
+                    self.similarity_method, self.similarity_dims[0], self.similarity_max_dist[0])
                 match = 'similar1'
 
         #if found:
