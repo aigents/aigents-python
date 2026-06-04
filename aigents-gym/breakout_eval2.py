@@ -23,6 +23,7 @@ parser.add_argument('-ss','--state_similarity', type=float, default=0.9, help='S
 parser.add_argument('-sm','--similarity_method', type=str, default="cos", help='State similarity method ("cos", "1-d/max", "exp(-d)", "1/(1+d)")')
 parser.add_argument('-tu','--transition_utility', type=int, default=None, help='Transition utility thereshold')
 parser.add_argument('-tc','--transition_count', type=int, default=1, help='Transition count threshold')
+parser.add_argument('-cc','--constant_curiosity', type=float, default=0.0, help='Constant curiosity')
 
 args = parser.parse_args()
 

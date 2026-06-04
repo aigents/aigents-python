@@ -5,17 +5,21 @@
   - learning stability
     - get rid of cosine_similarity with euclidean_similarity
       * re-run with new frame-based experimental setup, with different random seeds (sim_test2)
-        + 1-d/max
-        + cos
-        + exp(-d)
-        + 1/(1+d)
         + 1-d/max with self.similarity_dims and self.similarity_max_dist specific to S
-        - exp(-d) for the same N frames as Mnih
-          - with wider ange of thresholds
-          - with no thrreshold at all  
+        + exp(-d) for the same 5400000 frames as Mnih
+          + python ./aigents-gym/breakout_eval2.py -cs=2/3/41 -ss=0.9 -tu=0 -s=2 -mg=50000 -mt=5400000 -sm="exp(-d)" > sim_exp/exp5400000_s2/3/41ss09.txt
+        - optimize H-P!
+          * with no threshold at all (ss=1.0) 
+          * with wider ange of thresholds
+          * with zero-threshold ...
+            * lm=1/2 (2)
+            - sc=1/2/3 (2)
+            - cs=1/2/3
         - cos with one-hot encoding of x and y ???
     - plot representation "like Mhih & CEC"!?
     - c - chance to perform random action ("curiosity"), make dependant on "surpriziness" z_t = (s_t - s't)/max(s_t,s't), as c_t = Z * z_t
+      -cc - constant curiosity - chance to perform random action
+      -ac - anxious curiosity ....
     - g - extra positive feedback for predictiviness (1 - z_t), as d_t = R * (1-z_t), where R can be considered as an element of x
       OR
       - the same for "discoverinness"?
