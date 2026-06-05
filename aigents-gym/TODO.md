@@ -11,17 +11,14 @@
         - optimize H-P!
           * with no threshold at all (ss=1.0) with wider ange of thresholds and zero-threshold
             + lm=1/2 (2)
-            + sc=1/2/3 (2)
+            + ss=1.0
+            + sc=1/2/3 (1-2)
             * cs=1/2/3 (2-3???)
-            * ss
-              - ss03 vs ss10
-                - c2 => 1.0 wins
-                - c3 ...
-              - cs3 vs cs2
-                - ss10
-                - ss03
+              + 1080000 cs3
+              + 5400000 cs2/cs3
+              * 54000000 - ???
             ! counted utility!
-            ! multiple random useful transitions!?
+            ! randomise multiple ties of useful transitions!?
     * c - chance to perform random action ("curiosity"), make dependant on "surpriziness" z_t = (s_t - s't)/max(s_t,s't), as c_t = Z * z_t
       + -cc - constant curiosity - chance to perform random action - does not help
       ! -ac - anxious curiosity ....
