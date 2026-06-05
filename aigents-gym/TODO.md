@@ -17,11 +17,13 @@
               + 1080000 cs3
               + 5400000 cs2/cs3
               * 54000000 - ???
-            ! counted utility!
+            * counted utility!
+              + 1080000 - pu0 is better than p1
+              * 5400000
             ! randomise multiple ties of useful transitions!?
     * c - chance to perform random action ("curiosity"), make dependant on "surpriziness" z_t = (s_t - s't)/max(s_t,s't), as c_t = Z * z_t
       + -cc - constant curiosity - chance to perform random action - does not help
-      ! -ac - anxious curiosity ....
+      ! -mc - motivated curiosity ....
     ! fix paper comparison to Mhih!?
     - plot representation "like Mhih & CEC"!?
     - cos with one-hot encoding of x and y ???
