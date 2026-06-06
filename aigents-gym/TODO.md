@@ -22,7 +22,7 @@
               * 5400000
             ! randomise multiple ties of useful transitions!?
     * c - chance to perform random action ("curiosity"), make dependant on "surpriziness" z_t = (s_t - s't)/max(s_t,s't), as c_t = Z * z_t
-      + -cc - constant curiosity - chance to perform random action - does not help
+      + -cc - constant curiosity (inverse to greediness) - chance to perform random action - does not help
       ! -mc - motivated curiosity ....
     ! fix paper comparison to Mhih!?
     - plot representation "like Mhih & CEC"!?
