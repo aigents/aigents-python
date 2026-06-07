@@ -85,7 +85,7 @@ states = [331, 975, 1263, 1468, 1795, 1959, 2146, 2211, 2403, 2581, 2850, 3013, 
 
 ### Running the final evaluation
 
-To get the latest resaults reported in the paper, run the following commands:
+To get the latest results reported in the paper, run the following commands:
 ```
 mkdir sim_test3
 ...
