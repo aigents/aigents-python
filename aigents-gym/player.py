@@ -397,6 +397,13 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
         super().__init__(model=model,actions=actions,learn_mode=learn_mode,context_size=context_size,args=args,debug=debug)
         self.state_reward = state_reward
         self.encode_action = encode_action
+        self.expected_state = None
+        self.expectedness_reward = 0.0 if args is None else args.expectedness_reward
+        self.motivated_curiosity = 0.0 if args is None else args.motivated_curiosity
+
+        self.similarity_dims = [[3,1,1,178,178],[3,1,1,178,178]*2,[3,1,1,178,178]*3] # HACK - detect this on-the fly or from the model!!!
+        self.similarity_max_dist = [max_corner_distance(d) for d in self.similarity_dims]
+
 
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)
@@ -408,6 +415,18 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
             state = state_action+(1 if reward > 0 else 0,1 if reward < 0 else 0)+(racket_col, ball_col)
         else:
             state = state_action+(racket_col, ball_col)
+
+        curiosity = self.constant_curiosity # default is constant
+
+        if not self.expected_state is None and (self.expectedness_reward > 0 or self.motivated_curiosity > 0):
+            #compare self.expected_state with expected_state => expectedness = 1 - surpisingness
+            expectedness = norm_similarity(self.expected_state,state,self.similarity_method, self.similarity_dims[0], self.similarity_max_dist[0])
+            surpisingness = 1 - expectedness # not a "surprisal" https://en.wikipedia.org/wiki/Surprisal_analysis !?
+            if self.expectedness_reward > 0:
+                reward += expectedness * self.expectedness_reward # NOTE: this rewarding boost is not counted in state above (which uses external reward only)
+            #TODO make sure that reward is floating point
+            if self.motivated_curiosity > 0:
+                curiosity = max(surpisingness * self.motivated_curiosity, self.constant_curiosity)
 
         if not self.model is None and self.learn_mode != 0:
             if reward != 0:
@@ -421,11 +440,9 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
                 self.states.clear() # clear the states including the rewarded one to start over with new state and new action on it
             self.states.append(state)
 
-        if self.constant_curiosity > 0 and random.choices([True,False], weights=[self.constant_curiosity, 1.0 - self.constant_curiosity], k=1)[0]:
+        if curiosity > 0 and random.choices([True,False], weights=[curiosity, 1.0 - curiosity], k=1)[0]:
+            self.expected_state = None
             return random.choice(self.actions)
-
-        self.similarity_dims = [[3,1,1,178,178],[3,1,1,178,178]*2,[3,1,1,178,178]*3] # HACK - detect this on-the fly or from the model!!!
-        self.similarity_max_dist = [max_corner_distance(d) for d in self.similarity_dims]
 
         found = None
         #TODO compact this code with cs going down from self.context_size to 1
@@ -474,7 +491,9 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
             if not best is None:
                 #print('found',match,utility,count,len(transitions),best[0] if not best is None else '-')
                 action = one_hot_idx(best[:len(self.actions)]) if self.encode_action else best[0]
+                self.expected_state = best
                 return action
 
         #print("found none")
+        self.expected_state = None
         return random.choice(self.actions)

@@ -3,30 +3,11 @@
 ## TODO NEXT
 - IMPROVE
   - learning stability
-    - get rid of cosine_similarity with euclidean_similarity
-      * re-run with new frame-based experimental setup, with different random seeds (sim_test2)
-        + 1-d/max with self.similarity_dims and self.similarity_max_dist specific to S
-        + exp(-d) for the same 5400000 frames as Mnih
-          + python ./aigents-gym/breakout_eval2.py -cs=2/3/41 -ss=0.9 -tu=0 -s=2 -mg=50000 -mt=5400000 -sm="exp(-d)" > sim_exp/exp5400000_s2/3/41ss09.txt
-        - optimize H-P!
-          * with no threshold at all (ss=1.0) with wider ange of thresholds and zero-threshold
-            + lm=1/2 (2)
-            + ss=1.0
-            + sc=1/2/3 (1-2)
-            * cs=1/2/3 (2-3???)
-              + 1080000 cs3
-              + 5400000 cs2/cs3
-              * 54000000 - ???
-            * counted utility!
-              + 1080000 - pu0 is better than p1
-              * 5400000
-            ! randomise multiple ties of useful transitions!?
+    ? randomise multiple ties of useful transitions!?
     * c - chance to perform random action ("curiosity"), make dependant on "surpriziness" z_t = (s_t - s't)/max(s_t,s't), as c_t = Z * z_t
       + -cc - constant curiosity (inverse to greediness) - chance to perform random action - does not help
-      ! -mc - motivated curiosity ....
-    ! fix paper comparison to Mhih!?
-    - plot representation "like Mhih & CEC"!?
-    - cos with one-hot encoding of x and y ???
+      * -mc - motivated/modulated curiosity ....
+    - cosine similarity with one-hot encoding of x and y ???
     - g - extra positive feedback for predictiviness (1 - z_t), as d_t = R * (1-z_t), where R can be considered as an element of x
       OR
       - the same for "discoverinness"?

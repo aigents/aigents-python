@@ -25,6 +25,8 @@ parser.add_argument('-tu','--transition_utility', type=int, default=None, help='
 parser.add_argument('-tc','--transition_count', type=int, default=1, help='Transition count threshold')
 parser.add_argument('-cc','--constant_curiosity', type=float, default=0.0, help='Constant curiosity')
 parser.add_argument('-pu','--probable_utility', type=int, default=0, help='Probable utility (0 => u, 1 => c*u)')
+parser.add_argument('-er','--expectedness_reward', type=float, default=0.0, help='Expectedness reward')
+parser.add_argument('-mc','--motivated_curiosity', type=float, default=0.0, help='Motivated (by surprise) curiosity')
 
 args = parser.parse_args()
 
