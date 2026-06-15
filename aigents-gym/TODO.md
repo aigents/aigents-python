@@ -3,14 +3,16 @@
 ## TODO NEXT
 - IMPROVE
   - learning stability
+    ! analyze 200M and 400M
+    - ablation for multiple spacess
+      - 1 hot encodings
+      - ball/racket diff
+      - ball/racket diff sign
+      - add Y
+      - ...
     ? randomise multiple ties of useful transitions!?
-    * c - chance to perform random action ("curiosity"), make dependant on "surpriziness" z_t = (s_t - s't)/max(s_t,s't), as c_t = Z * z_t
-      + -cc - constant curiosity (inverse to greediness) - chance to perform random action - does not help
-      * -mc - motivated/modulated curiosity ....
+    ? compact the models?
     - cosine similarity with one-hot encoding of x and y ???
-    - g - extra positive feedback for predictiviness (1 - z_t), as d_t = R * (1-z_t), where R can be considered as an element of x
-      OR
-      - the same for "discoverinness"?
     - "selecting actions proportionally to their value estimate, injected with Gaussian noise per action", CEC, https://arxiv.org/abs/2211.15183 
     - e - extra negative feedback for energy consumption
   - expreimental setting like in Mnih?
