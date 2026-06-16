@@ -3,8 +3,8 @@
 ## TODO NEXT
 - IMPROVE
   - learning stability
-    ! analyze 200M and 400M
-    - ablation for multiple spacess
+    - ablation for multiple spaces
+      * exclude reward
       - 1 hot encodings
       - ball/racket diff
       - ball/racket diff sign

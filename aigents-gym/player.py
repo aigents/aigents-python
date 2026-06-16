@@ -395,9 +395,9 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
 
     def __init__(self,actions,model=None,learn_mode=0,context_size=1,args=None,state_reward=True,encode_action=False,debug=False):
         super().__init__(model=model,actions=actions,learn_mode=learn_mode,context_size=context_size,args=args,debug=debug)
-        self.state_reward = state_reward
         self.encode_action = encode_action
         self.expected_state = None
+        self.state_reward = args is None or args.state_reward == 1 # default: 1 => True, alternative 0 => False
         self.expectedness_reward = 0.0 if args is None else args.expectedness_reward
         self.motivated_curiosity = 0.0 if args is None else args.motivated_curiosity
 
