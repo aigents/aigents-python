@@ -3,13 +3,16 @@
 ## TODO NEXT
 - IMPROVE
   - learning stability
+    * exclude reward
+    - encode actions???
     - ablation for multiple spaces
-      * exclude reward
       - 1 hot encodings
       - ball/racket diff
       - ball/racket diff sign
       - add Y
       - ...
+    - PPO and Actor-Critic
+    ? hierarchical matchings with different resolutions  
     ? randomise multiple ties of useful transitions!?
     ? compact the models?
     - cosine similarity with one-hot encoding of x and y ???
