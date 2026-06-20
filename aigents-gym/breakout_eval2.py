@@ -28,6 +28,7 @@ parser.add_argument('-pu','--probable_utility', type=int, default=0, help='Proba
 parser.add_argument('-er','--expectedness_reward', type=float, default=0.0, help='Expectedness reward')
 parser.add_argument('-mc','--motivated_curiosity', type=float, default=0.0, help='Motivated (by surprise) curiosity')
 parser.add_argument('-sr','--state_reward', type=int, default=1, help='Place reward in state (1) or not (0)')
+parser.add_argument('-se','--state_encoder', type=str, default=None, help='Space encoder')
 
 args = parser.parse_args()
 

@@ -292,7 +292,7 @@ class BreakoutModelDriven(BreakoutProgrammable): # State-based History-aware Art
         self.args = args
         self.state_count_threshold = 2 if args is None else args.state_count
         self.state_similarity_threshold = 0.9 if args is None else args.state_similarity
-        self.transition_utility_thereshold = 0 if args is None else args.transition_utility
+        self.transition_utility_thereshold = 0 if args is None else args.transition_utility if args.transition_utility >=0 else None # any negative turns it off!
         self.transition_count_threshold = 1 if args is None else args.transition_count
         self.similarity_method = 'cos' if args is None else args.similarity_method
         self.constant_curiosity = 0.0 if args is None else args.constant_curiosity
@@ -400,6 +400,7 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
         self.state_reward = args is None or args.state_reward == 1 # default: 1 => True, alternative 0 => False
         self.expectedness_reward = 0.0 if args is None else args.expectedness_reward
         self.motivated_curiosity = 0.0 if args is None else args.motivated_curiosity
+        self.state_encoder = None if args.state_encoder is None else args.state_encoder
 
         self.similarity_dims = [[3,1,1,178,178],[3,1,1,178,178]*2,[3,1,1,178,178]*3] # HACK - detect this on-the fly or from the model!!!
         self.similarity_max_dist = [max_corner_distance(d) for d in self.similarity_dims]
@@ -408,13 +409,21 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)
 
-        # find racket & ball X
-        (racket_col, ball_col) = self.racket_ball_x(observation)
+        if self.state_encoder is None or self.state_encoder == "na":
+            state_sensations = self.racket_ball_x(observation) # find racket & ball X
+        elif self.state_encoder == "leftright": # bits for whether ball is on the left or on the right, compared to racket 
+            (racket_col, ball_col) = self.racket_ball_x(observation)
+            # same position => 1,1, ball left => (1,0), ball right => (0,1), no ball => (0,0) 
+            state_sensations = (0, 0) if INT_NONE in (racket_col, ball_col) else (1 if racket_col >= ball_col else 0, 1 if racket_col <= ball_col else 0)
+            #print(racket_col, ball_col, state_sensations)
+        else:
+            assert(False) # no state encoder supported 
+
         state_action = one_hot(previous_action,len(self.actions)) if self.encode_action else (previous_action,)
         if self.state_reward:
-            state = state_action+(1 if reward > 0 else 0,1 if reward < 0 else 0)+(racket_col, ball_col)
+            state = state_action + (1 if reward > 0 else 0,1 if reward < 0 else 0) + state_sensations
         else:
-            state = state_action+(racket_col, ball_col)
+            state = state_action + state_sensations
 
         curiosity = self.constant_curiosity # default is constant
 
