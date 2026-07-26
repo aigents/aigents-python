@@ -411,11 +411,29 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
 
         if self.state_encoder is None or self.state_encoder == "na":
             state_sensations = self.racket_ball_x(observation) # find racket & ball X
-        elif self.state_encoder == "leftright": # bits for whether ball is on the left or on the right, compared to racket 
+        elif self.state_encoder in ("leftright", "lr"): # bits for whether ball is on the left or on the right, compared to racket 
             (racket_col, ball_col) = self.racket_ball_x(observation)
             # same position => 1,1, ball left => (1,0), ball right => (0,1), no ball => (0,0) 
             state_sensations = (0, 0) if INT_NONE in (racket_col, ball_col) else (1 if racket_col >= ball_col else 0, 1 if racket_col <= ball_col else 0)
             #print(racket_col, ball_col, state_sensations)
+        elif self.state_encoder == "diff": # ... 
+            (racket_col, ball_col) = self.racket_ball_x(observation)
+            diff = racket_col - ball_col
+            #TODO ...
+        elif self.state_encoder == "hack": # hardcoded logic => all seeds: 375.0
+            (racket_col, ball_col) = self.racket_ball_x(observation)
+            return 1 if INT_NONE in (racket_col, ball_col) else 2 if racket_col < ball_col else 3 if racket_col > ball_col else 0 
+        elif self.state_encoder == "hacked": # hardcoded without wall reflection with direction-based prediction => all seeds: 404.0 
+            (racket_col, ball_col) = self.racket_ball_x(observation)
+            if INT_NONE in (racket_col, ball_col):
+                self.ball_col_old = INT_NONE
+                return 1
+            else:
+                if self.ball_col_old is None or self.ball_col_old == INT_NONE:
+                    self.ball_col_old = ball_col
+                ball_col_pred = ball_col + (ball_col - self.ball_col_old) if self.ball_col_old != INT_NONE else ball_col
+                self.ball_col_old = ball_col
+                return 2 if racket_col < ball_col_pred else 3 if racket_col > ball_col_pred else 0 
         else:
             assert(False) # no state encoder supported 
 

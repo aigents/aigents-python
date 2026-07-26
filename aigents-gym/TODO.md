@@ -6,19 +6,25 @@
     - encode actions???
     - ablation for multiple spaces
       * se=lr (ball/racket diff sign - should have impact)
+      ! ball/racket diff (as discrete lr but continuous)
+      ! downsample XY space df=2,3,... !!!???
       ? ea - should not have impact (0 - no action, 1 - action value, 2 - encoded action)
-      - 1 hot encodings - should not have impact
-      - ball/racket diff
+      ? 1 hot encodings - should not have impact
       - add Y
       - ...
     - PPO and Actor-Critic
+      - https://towardsdatascience.com/deep-reinforcement-learning-the-actor-critic-method/
+      - https://spinningup.openai.com/en/latest/algorithms/ppo.html
+      - https://spinningup.openai.com/en/latest/algorithms/sac.htmls
+      - consider 'value distributions' https://arxiv.org/pdf/1707.06887
+      - ...
     ? hierarchical matchings with different resolutions - "dynamic matching accuracy"!?
     ? randomise multiple ties of useful transitions!?
     ? compact the models?
     - cosine similarity with one-hot encoding of x and y ???
     - "selecting actions proportionally to their value estimate, injected with Gaussian noise per action", CEC, https://arxiv.org/abs/2211.15183 
     - e - extra negative feedback for energy consumption
-  - expreimental setting like in Mnih?
+  - experimental setting like in Mnih?
     - 100 epochs X epoch corresponds to 50000 minibatch weight updates or 30 minutes = 108,000 frames (averge over games??? is 168)
     - 50 epochs = 5,400,000 frames (maximum possible score of 225)
     - frameskip k = 4
