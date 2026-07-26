@@ -3,10 +3,8 @@
 ## TODO NEXT
 - IMPROVE
   - learning stability
-    - encode actions???
     - ablation for multiple spaces
       * se=lr (ball/racket diff sign - should have impact)
-      ! ball/racket diff (as discrete lr but continuous)
       ! downsample XY space df=2,3,... !!!???
       ? ea - should not have impact (0 - no action, 1 - action value, 2 - encoded action)
       ? 1 hot encodings - should not have impact
