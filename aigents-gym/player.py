@@ -409,17 +409,18 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
     def process_state(self, observation, reward, previous_action):
         observation = self.process_observation(observation,reward,previous_action)
 
-        if self.state_encoder is None or self.state_encoder == "na":
+        if self.state_encoder is None or self.state_encoder == "na": # "xx"
             state_sensations = self.racket_ball_x(observation) # find racket & ball X
-        elif self.state_encoder in ("leftright", "lr"): # bits for whether ball is on the left or on the right, compared to racket 
+        elif self.state_encoder in ("leftright", "lr"): # discrete bits for whether ball is on the left or on the right, compared to racket, no better than "na"/"xx" 
             (racket_col, ball_col) = self.racket_ball_x(observation)
             # same position => 1,1, ball left => (1,0), ball right => (0,1), no ball => (0,0) 
             state_sensations = (0, 0) if INT_NONE in (racket_col, ball_col) else (1 if racket_col >= ball_col else 0, 1 if racket_col <= ball_col else 0)
             #print(racket_col, ball_col, state_sensations)
-        elif self.state_encoder == "diff": # ... 
+        elif self.state_encoder == "diff": # continious diff between racket & ball X, no better than "na"/"xx", TODO distinguish NA,NA and 0,0 ???
             (racket_col, ball_col) = self.racket_ball_x(observation)
             diff = racket_col - ball_col
-            #TODO ...
+            state_sensations = (0, 0) if INT_NONE in (racket_col, ball_col) else (diff if racket_col >= ball_col else 0, -diff if racket_col <= ball_col else 0)
+            #print(racket_col, ball_col, state_sensations)
         elif self.state_encoder == "hack": # hardcoded logic => all seeds: 375.0
             (racket_col, ball_col) = self.racket_ball_x(observation)
             return 1 if INT_NONE in (racket_col, ball_col) else 2 if racket_col < ball_col else 3 if racket_col > ball_col else 0 

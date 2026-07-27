@@ -4,8 +4,9 @@
 - IMPROVE
   - learning stability
     - ablation for multiple spaces
-      * se=lr (ball/racket diff sign - should have impact)
       ! downsample XY space df=2,3,... !!!???
+        - https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf
+        - Working directly with raw Atari frames, which are 210 × 160 pixel images with a 128 color palette, can be computationally demanding, so we apply a basic preprocessing step aimed at reducing the input dimensionality. The raw frames are preprocessed by first converting their RGB representation to gray-scale and down-sampling it to a 110×84 image. The final input representation is obtained by cropping an 84 × 84 region of the image that roughly captures the playing area.
       ? ea - should not have impact (0 - no action, 1 - action value, 2 - encoded action)
       ? 1 hot encodings - should not have impact
       - add Y
