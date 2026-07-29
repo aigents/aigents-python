@@ -153,6 +153,14 @@ class BreakoutXXProgrammable(GymPlayer):
         return act
 
 
+"""
+https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf
+Working directly with raw Atari frames, which are 210×160 pixel images with a 128 color palette,
+can be computationally demanding, so we apply a basic preprocessing step aimed at reducing the
+input dimensionality. The raw frames are preprocessed by first converting their RGB representation
+to gray-scale and down-sampling it to a 110×84 image.
+"""
+
 class BreakoutProgrammable(GymPlayer):
 
     def __init__(self,model=None,learn_mode=0,context_size=1,debug=False):
@@ -161,9 +169,16 @@ class BreakoutProgrammable(GymPlayer):
         self.background_refresh_rate = 10
         
         #self.observation_top = 0 # Fair
+        #self.observation_top = 92 # on edge
         self.observation_top = 93 # Hack for Breakout - cut ceiling off
         #self.observation_border = 0 # Fair
+        #self.observation_border = 7 on edge
         self.observation_border = 8 # Hack for Breakout - cut walls off
+        self.observation_bottom = 0 # Fair
+        #self.observation_bottom = 16 # on edge
+        #self.observation_bottom = 17 # Hack for Breakout - cut empty bottom off
+
+        self.down_scaling = 1
 
         self.observations = Queue(maxsize=self.memory_size) 
         self.epoch = 0
@@ -189,11 +204,23 @@ class BreakoutProgrammable(GymPlayer):
         self.states = [] # all states in emotionally reinforced context
 
     def process_observation(self,observation,reward,previous_action):
-        if self.observation_top > 0: 
-            observation = observation[self.observation_top:]
-        if self.observation_border > 0: 
-            observation = [o[self.observation_border:-self.observation_border] for o in observation]
+        #print(len(observation),len(observation[0])) # Atari 210X160
+        if self.observation_top > 0:
+            top = int(self.observation_top / self.down_scaling)
+            bottom = int(self.observation_bottom / self.down_scaling)
+            observation = observation[top:-bottom] if bottom > 0 else observation[top:]
+        if self.observation_border > 0:
+            border = int(self.observation_border / self.down_scaling)
+            observation = [o[border:-border] for o in observation]
+        if self.down_scaling > 1:
+            observation = downsample_average(observation, self.down_scaling)
+        #print(type(observation))
+        #print(len(observation),len(observation[0])) # Atari 117X144
+        #print(observation)
         # accumulate observations in rolling window
+        #if self.epoch % 100 == 0:
+        #    print()
+        #    print_debug(observation)
         if self.observations.qsize() == self.memory_size:
             self.observations.get()
         self.observations.put((observation, reward))
@@ -297,6 +324,7 @@ class BreakoutModelDriven(BreakoutProgrammable): # State-based History-aware Art
         self.similarity_method = 'cos' if args is None else args.similarity_method
         self.constant_curiosity = 0.0 if args is None else args.constant_curiosity
         self.probable_utility = 0 if args is None else args.probable_utility
+        self.down_scaling = 1 if args is None else args.down_scaling
         #print(type(self.learn_mode),type(self.context_size),type(self.state_count_threshold),type(self.state_similarity_threshold),type(self.transition_utility_thereshold),type(self.transition_count_threshold))
         print(f"learn_mode={self.learn_mode}; context_size={self.context_size}; state_count={self.state_count_threshold}; state_similarity={self.state_similarity_threshold}; transition_utility={self.transition_utility_thereshold}; transition_count={self.transition_count_threshold}; constant_curiosity={self.constant_curiosity}; probable_utility={self.probable_utility}")
 
@@ -402,7 +430,7 @@ class BreakoutModelDrivenNov32025(BreakoutModelDriven):
         self.motivated_curiosity = 0.0 if args is None else args.motivated_curiosity
         self.state_encoder = None if args.state_encoder is None else args.state_encoder
 
-        self.similarity_dims = [[3,1,1,178,178],[3,1,1,178,178]*2,[3,1,1,178,178]*3] # HACK - detect this on-the fly or from the model!!!
+        self.similarity_dims = [[3,1,1,178,178],[3,1,1,178,178]*2,[3,1,1,178,178]*3] # TODO - HACK: check, detect this on-the fly or from the model based on actual state encoding!!!
         self.similarity_max_dist = [max_corner_distance(d) for d in self.similarity_dims]
 
 

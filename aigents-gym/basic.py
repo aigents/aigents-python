@@ -46,6 +46,28 @@ def get_avg_pos(a,t):
     return np.mean(indexes) if len(indexes) > 0 else None
 
 
+def downsample_average(data, factor):
+    rows = len(data)
+    cols = len(data[0]) if rows else 0
+    new_rows = rows // factor
+    new_cols = cols // factor
+    print(new_rows,rows,factor)
+    result = []
+    for i in range(new_rows):
+        row_avg = []
+        for j in range(new_cols):
+            block_sum = 0
+            for di in range(factor):
+                for dj in range(factor):
+                    block_sum += data[i*factor + di][j*factor + dj]
+            row_avg.append(block_sum // (factor * factor))
+        result.append(row_avg)
+    return result
+
+assert(str(downsample_average([[1, 1, 2, 2],[1, 1, 2, 2],[3, 3, 4, 4],[3, 3, 4, 4]], 2))=='[[1, 2], [3, 4]]')
+assert(str(downsample_average([[0, 1, 1, 2],[1, 2, 2, 3],[2, 3, 3, 4],[3, 4, 4, 5]], 2))=='[[1, 2], [3, 4]]')
+
+
 # Basic
 
 def cosine_similarity(a,b):

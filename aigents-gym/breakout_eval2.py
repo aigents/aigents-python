@@ -29,6 +29,7 @@ parser.add_argument('-er','--expectedness_reward', type=float, default=0.0, help
 parser.add_argument('-mc','--motivated_curiosity', type=float, default=0.0, help='Motivated (by surprise) curiosity')
 parser.add_argument('-sr','--state_reward', type=int, default=1, help='Place reward in state (1) or not (0)')
 parser.add_argument('-se','--state_encoder', type=str, default=None, help='Space encoder')
+parser.add_argument('-ds','--down_scaling', type=int, default=1, help='Down-scaling rate (1 - none, 2 - twice, 3 - trice, etc.)')
 
 args = parser.parse_args()
 
