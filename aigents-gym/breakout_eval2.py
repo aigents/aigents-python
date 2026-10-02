@@ -30,6 +30,8 @@ parser.add_argument('-mc','--motivated_curiosity', type=float, default=0.0, help
 parser.add_argument('-sr','--state_reward', type=int, default=1, help='Place reward in state (1) or not (0)')
 parser.add_argument('-se','--state_encoder', type=str, default=None, help='Space encoder')
 parser.add_argument('-ds','--down_scaling', type=int, default=1, help='Down-scaling rate (1 - none, 2 - twice, 3 - trice, etc.)')
+parser.add_argument('-dr','--debug_rate', type=int, default=0, help='Debug rate (0 - none, 1 - every frame, 10 - each 10th frame, etc.)')
+parser.add_argument('-hf','--hack_fire', type=int, default=0, help='Hack fire (0 - none, 1 - on every life loss)')
 
 args = parser.parse_args()
 
@@ -119,7 +121,9 @@ while (game < args.max_games and total < args.max_total):
         score += reward
     elif reward < 0:
         #print(reward,info['lives'],score,scores)
-        pass
+        if args.hack_fire > 0 and not (terminated or truncated): #TODO replace HACK for Breakout with learning when to FIRE or https://deepwiki.com/openai/baselines/3.2-environment-wrappers
+            action = 1
+            continue
 
     # If the episode has ended then we can reset to start a new episode
     if terminated or truncated or steps == args.max_steps or total == args.max_total:

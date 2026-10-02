@@ -174,11 +174,12 @@ class BreakoutProgrammable(GymPlayer):
         #self.observation_border = 0 # Fair
         #self.observation_border = 7 on edge
         self.observation_border = 8 # Hack for Breakout - cut walls off
-        self.observation_bottom = 0 # Fair
+        #self.observation_bottom = 0 # Fair
         #self.observation_bottom = 16 # on edge
-        #self.observation_bottom = 17 # Hack for Breakout - cut empty bottom off
+        self.observation_bottom = 17 # Hack for Breakout - cut empty bottom off
 
         self.down_scaling = 1
+        self.debug_rate = 0
 
         self.observations = Queue(maxsize=self.memory_size) 
         self.epoch = 0
@@ -206,21 +207,19 @@ class BreakoutProgrammable(GymPlayer):
     def process_observation(self,observation,reward,previous_action):
         #print(len(observation),len(observation[0])) # Atari 210X160
         if self.observation_top > 0:
-            top = int(self.observation_top / self.down_scaling)
-            bottom = int(self.observation_bottom / self.down_scaling)
+            top = self.observation_top
+            bottom = self.observation_bottom
             observation = observation[top:-bottom] if bottom > 0 else observation[top:]
         if self.observation_border > 0:
-            border = int(self.observation_border / self.down_scaling)
+            border = self.observation_border
             observation = [o[border:-border] for o in observation]
         if self.down_scaling > 1:
-            observation = downsample_average(observation, self.down_scaling)
-        #print(type(observation))
-        #print(len(observation),len(observation[0])) # Atari 117X144
+            observation = downsample_mean(observation, self.down_scaling, type(observation[0][0]))
+        if self.debug_rate > 0 and self.epoch % self.debug_rate == 0:
+            print(len(observation),len(observation[0]),previous_action,self.epoch) # Atari 117X144 (bottom=0), 100X144 (bottom=17)
+            print_debug(observation)
         #print(observation)
         # accumulate observations in rolling window
-        #if self.epoch % 100 == 0:
-        #    print()
-        #    print_debug(observation)
         if self.observations.qsize() == self.memory_size:
             self.observations.get()
         self.observations.put((observation, reward))
@@ -241,9 +240,12 @@ class BreakoutProgrammable(GymPlayer):
             for row in range(len(diff_vert)):
                 if diff_vert[row] > max:
                     max = diff_vert[row]
-                    self.racket_row = row
+                    racket_row = row
+        else:
+            racket_row = self.racket_row // self.down_scaling
+        #print(racket_row,observation[racket_row])
         #racket_col = np.argmax(np.convolve(diff[racket_row], [1,1,1], mode='same'))
-        racket_x = get_avg_pos(observation[self.racket_row],1)
+        racket_x = get_avg_pos(observation[racket_row],1)
         #ball_col = np.argmax(np.convolve(np.mean(diff_ball, axis=0), [1,1,1], mode='same'))
         ball_hor = observation[0:self.racket_row]
         ball_x = get_avg_pos(np.mean(ball_hor, axis=0),1)
@@ -325,6 +327,7 @@ class BreakoutModelDriven(BreakoutProgrammable): # State-based History-aware Art
         self.constant_curiosity = 0.0 if args is None else args.constant_curiosity
         self.probable_utility = 0 if args is None else args.probable_utility
         self.down_scaling = 1 if args is None else args.down_scaling
+        self.debug_rate = 0 if args is None else args.debug_rate
         #print(type(self.learn_mode),type(self.context_size),type(self.state_count_threshold),type(self.state_similarity_threshold),type(self.transition_utility_thereshold),type(self.transition_count_threshold))
         print(f"learn_mode={self.learn_mode}; context_size={self.context_size}; state_count={self.state_count_threshold}; state_similarity={self.state_similarity_threshold}; transition_utility={self.transition_utility_thereshold}; transition_count={self.transition_count_threshold}; constant_curiosity={self.constant_curiosity}; probable_utility={self.probable_utility}")
 
